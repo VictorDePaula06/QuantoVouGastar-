@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Combustível - Quanto Vou Gastar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        },
+                        success: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                        },
+                        warning: {
+                            50: '#fffbeb',
+                            100: '#fef3c7',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="font-inter bg-gradient-to-br from-blue-50 via-white to-indigo-50 min-h-screen">
+    <header class="bg-white shadow-sm border-b border-gray-200 fixed w-full top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-primary-500 p-2 rounded-lg">
+                        <i class="fas fa-gas-pump text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-900">Calculadora de Combustível</h1>
+                        <p class="text-sm text-gray-500">Planeje suas viagens com precisão</p>
+                    </div>
+                </div>
+                <button id="toggleSidebar"
+                    class="lg:hidden bg-gray-100 p-2 rounded-lg hover:bg-gray-200 transition-colors">
+                    <i class="fas fa-bars text-gray-600"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex flex-1 pt-16 h-full min-h-screen">
+
+        <div id="sidebar" class="bg-white shadow-lg border-r border-gray-200 overflow-y-auto 
+    transform lg:translate-x-0 -translate-x-full transition-transform duration-300 ease-in-out 
+    fixed top-16 left-0 lg:relative z-30 
+    w-full max-w-xs sm:max-w-sm lg:w-80" style="height: calc(100vh - 4rem);">
+
+            <div class="p-4 space-y-6">
+
+                <div class="bg-gradient-to-r from-primary-50 to-indigo-50 p-4 rounded-xl border border-primary-100">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-car text-primary-500 mr-2"></i>
+                        Cadastrar Veículo
+                    </h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="novoModelo" class="block text-sm font-medium text-gray-700 mb-1">Modelo do
+                                Veículo</label>
+                            <input type="text" id="novoModelo" placeholder="Ex: Honda Civic"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
+                        </div>
+                        <div>
+                            <label for="novaEficiencia" class="block text-sm font-medium text-gray-700 mb-1">Eficiência
+                                (km/l)</label>
+                            <input type="number" id="novaEficiencia" step="0.1" placeholder="Ex: 11.5"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
+                        </div>
+                        <button id="addVeiculoBtn"
+                            class="w-full bg-primary-500 hover:bg-primary-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center">
+                            <i class="fas fa-plus mr-2"></i>
+                            Adicionar Veículo
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-xl p-4">
+                    <h2
+                        class="text-lg font-semibold text-gray-800 mb-4 flex flex-col sm:flex-row sm:justify-between sm:items-center">
+                        <div class="flex items-center mb-2 sm:mb-0">
+                            <i class="fas fa-list text-gray-600 mr-2"></i>
+                            Meus Veículos
+                        </div>
+                        <button id="toggleInativosBtn"
+                            class="px-3 py-1 text-xs bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-lg transition-colors flex items-center shadow-sm w-full sm:w-auto"
+                            title="Mostrar/Esconder veículos inativos">
+                        </button>
+                    </h2>
+                    <div id="veiculosList" class="space-y-2"></div>
+                </div>
+
+                <div class="bg-gradient-to-r from-success-50 to-emerald-50 p-4 rounded-xl border border-success-100">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-route text-success-500 mr-2"></i>
+                        Planejar Viagem
+                    </h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="veiculo" class="block text-sm font-medium text-gray-700 mb-1">Selecione o
+                                Veículo</label>
+                            <select id="veiculo"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-success-500 focus:border-transparent transition-all">
+                                <option value="">Escolha um veículo</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="origem" class="block text-sm font-medium text-gray-700 mb-1">Origem</label>
+                            <input type="text" id="origem" placeholder="Digite o local de origem"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-success-500 focus:border-transparent transition-all">
+                        </div>
+                        <div>
+                            <label for="destino" class="block text-sm font-medium text-gray-700 mb-1">Destino</label>
+                            <input type="text" id="destino" placeholder="Digite o local de destino"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-success-500 focus:border-transparent transition-all">
+                        </div>
+                        <button id="calcularDistanciaBtn"
+                            class="w-full bg-success-500 hover:bg-success-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center">
+                            <i class="fas fa-map-marked-alt mr-2"></i>
+                            Calcular Rota
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-xl p-4">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-info-circle text-gray-600 mr-2"></i>
+                        Informações da Viagem
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                            <span class="text-sm font-medium text-gray-600">Distância:</span>
+                            <span id="distanciaDisplay" class="text-sm font-semibold text-gray-900">-- km</span>
+                        </div>
+                        <div>
+                            <label for="precoGasolina" class="block text-sm font-medium text-gray-700 mb-1">Preço da
+                                Gasolina (R$/L)</label>
+                            <input type="number" id="precoGasolina" value="6.09" step="0.01"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
+                        </div>
+                        <button id="calcularBtn"
+                            class="w-full bg-warning-500 hover:bg-warning-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center">
+                            <i class="fas fa-calculator mr-2"></i>
+                            Calcular Custo
+                        </button>
+                    </div>
+                </div>
+
+                <div id="resultado"
+                    class="hidden bg-gradient-to-r from-primary-500 to-indigo-600 text-white p-4 rounded-xl shadow-lg">
+                    <div class="text-center">
+                        <i class="fas fa-money-bill-wave text-2xl mb-2"></i>
+                        <p class="text-sm opacity-90">Custo estimado da viagem</p>
+                        <p id="resultadoValor" class="text-2xl font-bold"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex-1 relative">
+            <div id="map" class="w-full h-full bg-gray-100 flex items-center justify-center">
+                <div class="text-center text-gray-500">
+                    <i class="fas fa-map text-6xl mb-4 opacity-50"></i>
+                    <p class="text-xl font-medium">Mapa será carregado aqui</p>
+                    <p class="text-sm">Insira origem e destino para visualizar a rota</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="editModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4 z-50">
+        <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-md transform transition-all">
+            <h3 class="text-xl font-bold mb-4 flex items-center">
+                <i class="fas fa-edit text-primary-500 mr-2"></i>
+                Editar Veículo
+            </h3>
+            <div class="space-y-4">
+                <div>
+                    <label for="editModelo" class="block text-sm font-medium text-gray-700 mb-1">Modelo</label>
+                    <input type="text" id="editModelo"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
+                </div>
+                <div>
+                    <label for="editEficiencia" class="block text-sm font-medium text-gray-700 mb-1">Eficiência
+                        (km/l)</label>
+                    <input type="number" id="editEficiencia" step="0.1"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
+                </div>
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button id="cancelEditBtn"
+                        class="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+                        Cancelar
+                    </button>
+                    <button id="saveEditBtn"
+                        class="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors">
+                        Salvar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden hidden"></div>
+
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCVK6ApQ4_PjedcFUL_wRIMLJNLfPC1KjY&libraries=places"></script>
+
+    <script type="module" src="script.js"></script>
+</body>
+
+</html>

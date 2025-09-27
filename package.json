@@ -1,0 +1,25 @@
+{
+  "name": "calculadora-combustivel",
+  "version": "2.0.0",
+  "description": "Calculadora de combustível com mapa interativo para planejamento de viagens",
+  "main": "index.html",
+  "scripts": {
+    "start": "http-server . -p 5500 -o",
+    "dev": "http-server . -p 5500 -o -c-1"
+  },
+  "keywords": [
+    "calculadora",
+    "combustivel",
+    "viagem",
+    "google-maps",
+    "firebase"
+  ],
+  "author": "Seu Nome",
+  "license": "MIT",
+  "dependencies": {
+    "firebase": "^12.2.1"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
