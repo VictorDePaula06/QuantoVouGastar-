@@ -45,7 +45,8 @@
     </script>
 </head>
 
-<body class="font-inter bg-gradient-to-br from-blue-50 via-white to-indigo-50 min-h-screen">
+<body class="font-inter bg-gray-50 min-h-screen">
+
     <header class="bg-white shadow-sm border-b border-gray-200 fixed w-full top-0 z-40">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
@@ -54,118 +55,174 @@
                         <i class="fas fa-gas-pump text-white text-xl"></i>
                     </div>
                     <div>
-                        <h1 class="text-xl font-bold text-gray-900">Calculadora de Combustível</h1>
-                        <p class="text-sm text-gray-500">Planeje suas viagens com precisão</p>
+                        <h1 class="text-xl font-bold text-gray-900 hidden sm:block">Calculadora</h1>
+                        <h1 class="text-xl font-bold text-gray-900 sm:hidden">Combustível</h1>
+                        <p class="text-xs text-gray-500">Planeje suas viagens</p>
                     </div>
                 </div>
-                <button id="toggleSidebar"
-                    class="lg:hidden bg-gray-100 p-2 rounded-lg hover:bg-gray-200 transition-colors">
-                    <i class="fas fa-bars text-gray-600"></i>
-                </button>
+
+                <div id="authStatus" class="flex items-center space-x-2">
+                    <div id="userInfo" class="text-right hidden md:block">
+                        <p class="text-sm font-medium text-gray-700 leading-tight" id="userName">Usuário</p>
+                        <p class="text-xs text-gray-500" id="userEmail"></p>
+                    </div>
+
+                    <button id="authBtn" class="btn-auth-header">
+                        <i class="fab fa-google text-lg"></i>
+                        <span class="ml-2 hidden md:inline">Entrar</span>
+                    </button>
+
+                    <button id="toggleSidebar"
+                        class="lg:hidden bg-gray-100 p-2 rounded-lg hover:bg-gray-200 transition-colors">
+                        <i class="fas fa-bars text-gray-600"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </header>
 
     <div class="flex flex-1 pt-16 h-full min-h-screen">
 
-        <div id="sidebar" class="bg-white shadow-lg border-r border-gray-200 overflow-y-auto 
-    transform lg:translate-x-0 -translate-x-full transition-transform duration-300 ease-in-out 
-    fixed top-16 left-0 lg:relative z-30 
-    w-full max-w-xs sm:max-w-sm lg:w-80" style="height: calc(100vh - 4rem);">
+        <div id="sidebar" class="bg-gray-50 shadow-xl border-r border-gray-200 overflow-y-auto 
+        transform -translate-x-full fixed top-16 left-0 z-30 w-full max-w-sm 
+        lg:translate-x-0 lg:relative lg:w-96 lg:shadow-none 
+        transition-transform duration-300 ease-in-out" style="height: calc(100vh - 4rem);">
 
-            <div class="p-4 space-y-6 pb-20">
+            <div class="p-4 space-y-4 pb-20">
 
-                <div class="bg-gradient-to-r from-primary-50 to-indigo-50 p-4 rounded-xl border border-primary-100">
-                    <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                        <i class="fas fa-car text-primary-500 mr-2"></i>
+                <div class="card-section border border-primary-100">
+                    <h2 class="section-title text-primary-500">
+                        <i class="fas fa-car mr-2"></i>
                         Cadastrar Veículo
                     </h2>
-                    <div class="space-y-4">
+                    <div class="space-y-3">
                         <div>
-                            <label for="novoModelo" class="block text-sm font-medium text-gray-700 mb-1">Modelo do
-                                Veículo</label>
-                            <input type="text" id="novoModelo" placeholder="Ex: Honda Civic"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
+                            <label for="novoModelo" class="input-label">Modelo do Veículo</label>
+                            <input type="text" id="novoModelo" placeholder="Ex: Honda Civic" class="input-field">
                         </div>
                         <div>
-                            <label for="novaEficiencia" class="block text-sm font-medium text-gray-700 mb-1">Eficiência
-                                (km/l)</label>
-                            <input type="number" id="novaEficiencia" step="0.1" placeholder="Ex: 11.5"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
+                            <label for="novaEficienciaGasolina" class="input-label">Eficiência Gasolina (km/l)</label>
+                            <input type="number" id="novaEficienciaGasolina" step="0.1" placeholder="Ex: 12.0"
+                                class="input-field">
                         </div>
-                        <button id="addVeiculoBtn"
-                            class="w-full bg-primary-500 hover:bg-primary-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center">
+                        <div>
+                            <label for="novaEficienciaEtanol" class="input-label">Eficiência Etanol (km/l)</label>
+                            <input type="number" id="novaEficienciaEtanol" step="0.1" placeholder="Ex: 8.5 (Opcional)"
+                                class="input-field">
+                        </div>
+                        <div>
+                            <label for="novaEficienciaGnv" class="input-label">Eficiência GNV (km/m³)</label>
+                            <input type="number" id="novaEficienciaGnv" step="0.1" placeholder="Ex: 13.0 (Opcional)"
+                                class="input-field">
+                        </div>
+
+                        <button id="addVeiculoBtn" class="w-full btn-primary">
                             <i class="fas fa-plus mr-2"></i>
                             Adicionar Veículo
                         </button>
                     </div>
                 </div>
 
-                <div class="bg-white border border-gray-200 rounded-xl p-4">
-                    <h2
-                        class="text-lg font-semibold text-gray-800 mb-4 flex flex-col sm:flex-row sm:justify-between sm:items-center">
-                        <div class="flex items-center mb-2 sm:mb-0">
-                            <i class="fas fa-list text-gray-600 mr-2"></i>
-                            Meus Veículos
+                <div class="card-section border border-gray-200">
+                    <h2 class="section-title text-gray-700">
+                        <i class="fas fa-list mr-2"></i>
+                        Meus Veículos
+                    </h2>
+                    <div class="flex justify-between items-center mb-3">
+                        <div id="veiculosList" class="space-y-2 w-full">
+                            <div class="p-4 text-center text-gray-500">Faça login para gerenciar seus veículos.</div>
                         </div>
                         <button id="toggleInativosBtn"
-                            class="px-3 py-1 text-xs bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-lg transition-colors flex items-center shadow-sm w-full sm:w-auto"
+                            class="px-3 py-1 text-xs bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-lg transition-colors flex items-center shadow-sm w-fit hidden"
                             title="Mostrar/Esconder veículos inativos">
                         </button>
-                    </h2>
-                    <div id="veiculosList" class="space-y-2"></div>
+                    </div>
+
                 </div>
 
-                <div class="bg-gradient-to-r from-success-50 to-emerald-50 p-4 rounded-xl border border-success-100">
-                    <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                        <i class="fas fa-route text-success-500 mr-2"></i>
+                <div class="card-section border border-success-100">
+                    <h2 class="section-title text-success-500">
+                        <i class="fas fa-route mr-2"></i>
                         Planejar Viagem
                     </h2>
-                    <div class="space-y-4">
+                    <div class="space-y-3">
                         <div>
-                            <label for="veiculo" class="block text-sm font-medium text-gray-700 mb-1">Selecione o
-                                Veículo</label>
-                            <select id="veiculo"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-success-500 focus:border-transparent transition-all">
+                            <label for="veiculo" class="input-label">Selecione o Veículo</label>
+                            <select id="veiculo" class="input-field">
                                 <option value="">Escolha um veículo</option>
                             </select>
                         </div>
+
                         <div>
-                            <label for="origem" class="block text-sm font-medium text-gray-700 mb-1">Origem</label>
-                            <input type="text" id="origem" placeholder="Digite o local de origem"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-success-500 focus:border-transparent transition-all">
+                            <label for="combustivel" class="input-label">Combustível Utilizado</label>
+                            <select id="combustivel" class="input-field">
+                                <option value="gasolina">Gasolina</option>
+                                <option value="etanol">Etanol</option>
+                                <option value="gnv">GNV</option>
+                            </select>
                         </div>
-                        <div>
-                            <label for="destino" class="block text-sm font-medium text-gray-700 mb-1">Destino</label>
-                            <input type="text" id="destino" placeholder="Digite o local de destino"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-success-500 focus:border-transparent transition-all">
+
+                        <div class="space-y-4 pt-4 border-t border-gray-100">
+                            <div>
+                                <label for="origem" class="input-label">Origem</label>
+                                <input type="text" id="origem" placeholder="Digite o local de origem"
+                                    class="input-field">
+                            </div>
+                            <div>
+                                <label for="destino" class="input-label">Destino</label>
+                                <input type="text" id="destino" placeholder="Digite o local de destino"
+                                    class="input-field">
+                            </div>
                         </div>
-                        <button id="calcularDistanciaBtn"
-                            class="w-full bg-success-500 hover:bg-success-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center">
+
+
+                        <div class="space-y-3 border border-warning-100 p-3 rounded-lg">
+                            <h3 class="text-xs font-semibold text-warning-600 flex items-center">
+                                <i class="fas fa-map-pin mr-2"></i>
+                                Paradas Opcionais
+                            </h3>
+                            <div>
+                                <label for="parada1" class="input-label text-xs">Parada 1</label>
+                                <input type="text" id="parada1" placeholder="Local da primeira parada"
+                                    class="input-field text-sm">
+                            </div>
+                            <div>
+                                <label for="parada2" class="input-label text-xs">Parada 2</label>
+                                <input type="text" id="parada2" placeholder="Local da segunda parada"
+                                    class="input-field text-sm">
+                            </div>
+                        </div>
+
+                        <div class="flex items-center pt-2">
+                            <input id="idaEVolta" type="checkbox"
+                                class="h-4 w-4 text-success-600 border-gray-300 rounded focus:ring-success-500">
+                            <label for="idaEVolta" class="ml-2 block text-sm font-medium text-gray-700">
+                                Incluir Ida e Volta
+                            </label>
+                        </div>
+
+                        <button id="calcularDistanciaBtn" class="w-full btn-success">
                             <i class="fas fa-map-marked-alt mr-2"></i>
                             Calcular Rota
                         </button>
                     </div>
                 </div>
 
-                <div class="bg-white border border-gray-200 rounded-xl p-4">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                        <i class="fas fa-info-circle text-gray-600 mr-2"></i>
-                        Informações da Viagem
+                <div class="card-section border border-gray-200">
+                    <h3 class="section-title text-gray-700">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        Informações e Custo
                     </h3>
                     <div class="space-y-3">
                         <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                            <span class="text-sm font-medium text-gray-600">Distância:</span>
+                            <span class="text-sm font-medium text-gray-600">Distância Calculada:</span>
                             <span id="distanciaDisplay" class="text-sm font-semibold text-gray-900">-- km</span>
                         </div>
                         <div>
-                            <label for="precoGasolina" class="block text-sm font-medium text-gray-700 mb-1">Preço da
-                                Gasolina (R$/L)</label>
-                            <input type="number" id="precoGasolina" value="6.09" step="0.01"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
+                            <label for="precoGasolina" class="input-label">Preço do Combustível (R$/L)</label>
+                            <input type="number" id="precoGasolina" value="6.09" step="0.01" class="input-field">
                         </div>
-                        <button id="calcularBtn"
-                            class="w-full bg-warning-500 hover:bg-warning-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center">
+                        <button id="calcularBtn" class="w-full btn-warning">
                             <i class="fas fa-calculator mr-2"></i>
                             Calcular Custo
                         </button>
@@ -173,7 +230,7 @@
                 </div>
 
                 <div id="resultado"
-                    class="hidden bg-gradient-to-r from-primary-500 to-indigo-600 text-white p-4 rounded-xl shadow-lg">
+                    class="hidden bg-primary-500 text-white p-4 rounded-xl shadow-lg animate-fade-in-up">
                     <div class="text-center">
                         <i class="fas fa-money-bill-wave text-2xl mb-2"></i>
                         <p class="text-sm opacity-90">Custo estimado da viagem</p>
@@ -188,7 +245,7 @@
                 <div class="text-center text-gray-500">
                     <i class="fas fa-map text-6xl mb-4 opacity-50"></i>
                     <p class="text-xl font-medium">Mapa será carregado aqui</p>
-                    <p class="text-sm">Insira origem e destino para visualizar a rota</p>
+                    <p class="text-sm">Abra o menu para planejar a rota</p>
                 </div>
             </div>
         </div>
@@ -207,21 +264,34 @@
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
                 </div>
                 <div>
-                    <label for="editEficiencia" class="block text-sm font-medium text-gray-700 mb-1">Eficiência
-                        (km/l)</label>
-                    <input type="number" id="editEficiencia" step="0.1"
+                    <label for="editEficienciaGasolina" class="block text-sm font-medium text-gray-700 mb-1">Eficiência
+                        Gasolina (km/l)</label>
+                    <input type="number" id="editEficienciaGasolina" step="0.1"
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
                 </div>
-                <div class="flex justify-end space-x-3 pt-4">
-                    <button id="cancelEditBtn"
-                        class="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
-                        Cancelar
-                    </button>
-                    <button id="saveEditBtn"
-                        class="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors">
-                        Salvar
-                    </button>
+                <div>
+                    <label for="editEficienciaEtanol" class="block text-sm font-medium text-gray-700 mb-1">Eficiência
+                        Etanol (km/l)</label>
+                    <input type="number" id="editEficienciaEtanol" step="0.1"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
                 </div>
+                <div>
+                    <label for="editEficienciaGnv" class="block text-sm font-medium text-gray-700 mb-1">Eficiência GNV
+                        (km/m³)</label>
+                    <input type="number" id="editEficienciaGnv" step="0.1"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
+                </div>
+
+            </div>
+            <div class="flex justify-end space-x-3 pt-4">
+                <button id="cancelEditBtn"
+                    class="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+                    Cancelar
+                </button>
+                <button id="saveEditBtn"
+                    class="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors">
+                    Salvar
+                </button>
             </div>
         </div>
     </div>
