@@ -1,6 +1,6 @@
 /* ===============================
-   Estilos personalizados - Calculadora de Combustível
-   =============================== */
+    Estilos personalizados - Calculadora de Combustível (Dark Mode)
+    =============================== */
 
 /* Animações e transições suaves */
 * {
@@ -13,22 +13,22 @@
 }
 
 ::-webkit-scrollbar-track {
-    background: #f1f5f9;
+    background: #1f2937;
     border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
+    background: #4b5563;
     border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
+    background: #6b7280;
 }
 
 /* ===============================
-   Animações
-   =============================== */
+    Animações
+    =============================== */
 @keyframes slideInRight {
     from {
         transform: translateX(100%);
@@ -37,30 +37,6 @@
 
     to {
         transform: translateX(0);
-        opacity: 1;
-    }
-}
-
-@keyframes slideInLeft {
-    from {
-        transform: translateX(-100%);
-        opacity: 0;
-    }
-
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
-
-@keyframes fadeInUp {
-    from {
-        transform: translateY(20px);
-        opacity: 0;
-    }
-
-    to {
-        transform: translateY(0);
         opacity: 1;
     }
 }
@@ -84,61 +60,62 @@
     animation: fadeInUp 0.4s ease-out;
 }
 
-
 /* ===============================
-   Design de Componentes (Novos)
-   =============================== */
+    Design de Componentes
+    =============================== */
 
 /* Estilos de Seção (Containers de Formulário) */
 .card-section {
-    background: #ffffff;
+    background: #374151;
+    /* dark-card */
     border-radius: 12px;
     padding: 1rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
 .section-title {
     font-size: 1.125rem;
-    /* text-lg */
     font-weight: 600;
-    /* font-semibold */
     margin-bottom: 1rem;
     display: flex;
     align-items: center;
     padding-bottom: 0.5rem;
-    border-bottom: 1px solid #f3f4f6;
+    border-bottom: 1px solid #4b5563;
+    /* gray-600 */
 }
-
 
 /* Estilos de Input e Label */
 .input-label {
     display: block;
     font-size: 0.875rem;
-    /* text-sm */
     font-weight: 500;
-    /* font-medium */
-    color: #4b5563;
-    /* text-gray-700 */
+    color: #d1d5db;
+    /* text-gray-300 */
     margin-bottom: 0.25rem;
 }
 
 .input-field {
     width: 100%;
     padding: 0.6rem 0.75rem;
-    border: 1px solid #d1d5db;
-    /* border-gray-300 */
+    border: 1px solid #4b5563;
+    /* gray-600 */
+    background-color: #4b5563;
+    /* gray-600 */
+    color: #ffffff;
     border-radius: 0.5rem;
-    /* rounded-lg */
     font-size: 1rem;
     transition: all 0.15s ease-in-out;
 }
 
 .input-field:focus {
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
-    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.5);
+    /* accent-blue/50 */
+    border-color: #60a5fa;
+    /* accent-blue */
+    background-color: #374151;
+    /* dark-card */
     outline: none;
 }
-
 
 /* Estilos de Botão Principal */
 .btn-primary,
@@ -148,26 +125,28 @@
     border-radius: 0.5rem;
     font-weight: 600;
     color: white;
-    transition: background-color 0.15s;
+    transition: background-color 0.15s, transform 0.1s;
     display: flex;
     align-items: center;
     justify-content: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
+/* Cores dos Botões */
 .btn-primary {
-    background-color: #3b82f6;
+    background-color: #60a5fa;
 }
 
 .btn-primary:hover {
-    background-color: #2563eb;
+    background-color: #3b82f6;
 }
 
 .btn-success {
-    background-color: #22c55e;
+    background-color: #34d399;
 }
 
 .btn-success:hover {
-    background-color: #16a34a;
+    background-color: #10b981;
 }
 
 .btn-warning {
@@ -178,24 +157,70 @@
     background-color: #d97706;
 }
 
+/* Efeito de click */
+.btn-primary:active,
+.btn-success:active,
+.btn-warning:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Estilo para o botão/ícone de Login/Logout na Header */
+.btn-auth-header {
+    background-color: #60a5fa;
+    /* accent-blue */
+    color: white;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+}
+
+.btn-auth-header:hover {
+    background-color: #3b82f6;
+}
+
+/* Garante que o botão seja pequeno no mobile */
+@media (max-width: 767px) {
+    .btn-auth-header {
+        padding: 0.5rem;
+    }
+
+    .btn-auth-header span {
+        display: none !important;
+    }
+}
+
+
 /* ===============================
-   Cards de veículos (Ajustados)
-   =============================== */
+    Cards de veículos
+    =============================== */
 .vehicle-card {
-    background: #f9fafb;
-    border: 1px solid #e5e7eb;
+    background: #4b5563;
+    /* gray-600 */
+    border: 1px solid #6b7280;
+    /* gray-500 */
     border-radius: 8px;
     padding: 12px;
     margin-bottom: 8px;
     transition: all 0.2s ease;
+    color: #ffffff;
 }
 
 .vehicle-card:hover {
-    box-shadow: 0 1px 6px rgba(59, 130, 246, 0.1);
+    box-shadow: 0 1px 6px rgba(96, 165, 250, 0.3);
+    background: #6b7280;
+    /* gray-500 */
 }
 
 .vehicle-card.inactive {
-    opacity: 0.6;
+    opacity: 0.5;
+    background: #374151;
+    /* dark-card */
+    border-color: #4b5563;
 }
 
 /* Mobile Layout para Card de Veículos */
@@ -218,14 +243,12 @@
         text-align: center;
         padding: 0.4rem 0.6rem;
         font-size: 0.75rem;
-        /* text-xs */
     }
 }
 
-
 /* ===============================
-   Notificações (Mantido)
-   =============================== */
+    Notificações, Resultado, Loading
+    =============================== */
 .message-box {
     position: fixed;
     top: 20px;
@@ -236,39 +259,20 @@
     font-weight: 500;
     z-index: 1000;
     min-width: 300px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
     animation: slideInRight 0.3s ease-out;
 }
 
 .message-box.success {
-    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
 }
 
 .message-box.error {
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
 }
 
 .message-box.info {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-}
-
-/* Ajustes mobile para mensagens */
-@media (max-width: 480px) {
-    .message-box {
-        right: 10px;
-        left: 10px;
-        min-width: auto;
-        font-size: 0.9rem;
-        padding: 10px 12px;
-    }
-}
-
-/* ===============================
-   Loading e Resultado (Mantido)
-   =============================== */
-.loading {
-    position: relative;
-    pointer-events: none;
+    background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
 }
 
 .loading:after {
@@ -286,64 +290,65 @@
 }
 
 #resultado {
-    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 10px 25px rgba(96, 165, 250, 0.4);
+}
+
+/* Estilos para Rotas Alternativas */
+.route-option-card {
+    background: #4b5563;
+    /* gray-600 */
+    border: 1px solid #6b7280;
+    /* gray-500 */
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.route-option-card:hover {
+    background: #6b7280;
+    /* gray-500 */
+    box-shadow: 0 2px 8px rgba(96, 165, 250, 0.2);
+}
+
+.route-option-card.selected {
+    border-color: #60a5fa;
+    /* accent-blue */
+    border-width: 2px;
+    background: #374151;
+    /* dark-card */
+}
+
+.route-option-card .route-title {
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.route-option-card .route-details {
+    font-size: 0.875rem;
+    color: #d1d5db;
 }
 
 /* ===============================
-   Mapas e Layout Geral
-   =============================== */
+    Layout Geral
+    =============================== */
 #map {
     border-radius: 0;
-    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.3);
 }
 
 /* OTIMIZAÇÃO MOBILE (max-width: 640px) */
 @media (max-width: 640px) {
-
-    /* Ajustes na sidebar para torná-la mais compacta */
     #sidebar .p-4 {
         padding: 1rem 0.75rem;
     }
 
-    /* Reduz o padding dos inputs e selects */
     #sidebar .input-field {
         padding: 0.5rem 0.75rem;
     }
 
-    /* Ajusta o padding interno dos blocos de formulário */
     .card-section {
         padding: 1rem;
-    }
-}
-
-/* Estilo para o botão/ícone de Login/Logout na Header */
-.btn-auth-header {
-    background-color: #3b82f6;
-    /* primary-500 */
-    color: white;
-    padding: 0.5rem 0.75rem;
-    /* Padding mais apertado */
-    border-radius: 0.5rem;
-    font-weight: 500;
-    white-space: nowrap;
-    transition: background-color 0.2s;
-    display: flex;
-    align-items: center;
-}
-
-.btn-auth-header:hover {
-    background-color: #2563eb;
-}
-
-/* Garante que o botão seja pequeno no mobile */
-@media (max-width: 767px) {
-    .btn-auth-header {
-        padding: 0.5rem;
-        /* Deixa ele quadrado no mobile */
-    }
-
-    .btn-auth-header span {
-        display: none !important;
-        /* Esconde o texto "Entrar" no mobile */
     }
 }
