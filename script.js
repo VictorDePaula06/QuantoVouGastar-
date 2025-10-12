@@ -123,35 +123,36 @@ async function signOutUser() { try { await signOut(auth); showMessage("Você sai
 
 function updateUI(user) {
     const authBtn = document.getElementById("authBtn");
-    const userInfo = document.getElementById("userInfo");
-    const userNameDisplay = document.getElementById("userName");
-    const userEmailDisplay = document.getElementById("userEmail");
+    const authIcon = document.getElementById("authIcon");
     const toggleBtn = document.getElementById("toggleSidebar");
 
     if (user) {
         currentUserId = user.uid;
-        userNameDisplay.textContent = user.displayName || "Usuário";
-        userEmailDisplay.textContent = user.email || "";
-        userInfo.classList.remove("hidden");
-        authBtn.innerHTML = `<i class="fas fa-sign-out-alt text-lg md:mr-1"></i><span class="ml-2 hidden md:inline">Sair</span>`;
+        // Se houver usuário, muda o ícone para um de perfil ou logout
+        authIcon.className = "fas fa-user-circle text-lg";
+        // Adiciona um listener para o perfil/logout
         authBtn.onclick = signOutUser;
+        authBtn.title = `Sair de ${user.displayName}`;
+
     } else {
         currentUserId = null;
-        userInfo.classList.add("hidden");
-        authBtn.innerHTML = `<i class="fab fa-google text-lg md:mr-1"></i><span class="ml-2 hidden md:inline">Entrar</span>`;
+        // Se deslogado, volta para o ícone do Google (entrar)
+        authIcon.className = "fab fa-google text-lg";
         authBtn.onclick = signIn;
+        authBtn.title = "Entrar com Google";
     }
 
     // Gerencia a visibilidade do botão de menu no mobile
+    // NOTA: O botão de menu sanduíche foi movido para a esquerda no HTML
     if (window.innerWidth <= 1024) {
-        toggleBtn.style.display = user ? 'flex' : 'none';
+        toggleBtn.style.display = 'flex'; // Sempre visível para abrir o menu lateral
         // Se deslogar, força a sidebar a fechar no mobile
         if (!user) {
             document.getElementById("sidebar").classList.add("-translate-x-full");
             document.getElementById("sidebarOverlay").classList.add("hidden");
         }
     } else {
-        toggleBtn.style.display = 'none'; // Sempre escondido no desktop
+        toggleBtn.style.display = 'none'; // Escondido no desktop (o menu já está visível)
     }
 
     loadVeiculos();
@@ -266,10 +267,57 @@ document.getElementById("toggleInativosBtn").addEventListener("click", () => {
     loadVeiculos();
 });
 
-// ===== Cadastro e Edição (Mantidas) =====
-document.getElementById("addVeiculoBtn").addEventListener("click", async () => { /* ... */ });
-document.getElementById("cancelEditBtn").addEventListener("click", () => { /* ... */ });
-document.getElementById("saveEditBtn").addEventListener("click", async () => { /* ... */ });
+// ===== Add vehicle =====
+document.getElementById("addVeiculoBtn").addEventListener("click", async () => {
+    if (!currentUserId) { showMessage("Faça login para cadastrar um veículo.", "error"); return; }
+    const modelo = document.getElementById("novoModelo").value.trim();
+    const ef_gas = parseFloat(document.getElementById("novaEficienciaGasolina").value.trim());
+    const ef_eta = parseFloat(document.getElementById("novaEficienciaEtanol").value.trim() || 0);
+    const ef_gnv = parseFloat(document.getElementById("novaEficienciaGnv").value.trim() || 0);
+    if (!modelo || isNaN(ef_gas) || ef_gas <= 0) { showMessage("Preencha o Modelo e a Eficiência Gasolina corretamente!", "error"); return; }
+    const btn = document.getElementById("addVeiculoBtn");
+    btn.classList.add("loading"); btn.disabled = true;
+    try {
+        await addDoc(collection(db, "veiculos"), { modelo, userId: currentUserId, eficiencias: { gasolina: ef_gas, etanol: isNaN(ef_eta) ? 0 : ef_eta, gnv: isNaN(ef_gnv) ? 0 : ef_gnv }, ativo: true });
+        showMessage("Veículo cadastrado com sucesso!");
+        document.getElementById("novoModelo").value = ""; document.getElementById("novaEficienciaGasolina").value = ""; document.getElementById("novaEficienciaEtanol").value = ""; document.getElementById("novaEficienciaGnv").value = "";
+        loadVeiculos();
+    } catch (e) { console.error(e); showMessage("Erro ao cadastrar veículo!", "error"); } finally { btn.classList.remove("loading"); btn.disabled = false; }
+});
+
+// ===== Edit modal actions (CORRIGIDO) =====
+function closeEditModal() {
+    document.getElementById("editModal").classList.add("hidden");
+    document.getElementById("editModal").classList.remove("flex");
+    window.editId = null; // Limpa o ID de edição
+}
+
+document.getElementById("cancelEditBtn").addEventListener("click", closeEditModal);
+
+document.getElementById("saveEditBtn").addEventListener("click", async () => {
+    if (!currentUserId || !window.editId) return;
+    const modelo = document.getElementById("editModelo").value.trim();
+    const ef_gas = parseFloat(document.getElementById("editEficienciaGasolina").value);
+    const ef_eta = parseFloat(document.getElementById("editEficienciaEtanol").value || 0);
+    const ef_gnv = parseFloat(document.getElementById("editEficienciaGnv").value || 0);
+    if (!modelo || isNaN(ef_gas) || ef_gas <= 0) { showMessage("Preencha o Modelo e a Eficiência Gasolina corretamente!", "error"); return; }
+
+    const btn = document.getElementById("saveEditBtn");
+    btn.classList.add("loading"); btn.disabled = true;
+
+    try {
+        await updateDoc(doc(db, "veiculos", window.editId), { modelo, eficiencias: { gasolina: ef_gas, etanol: isNaN(ef_eta) ? 0 : ef_eta, gnv: isNaN(ef_gnv) ? 0 : ef_gnv } });
+        showMessage("Veículo atualizado com sucesso!");
+        loadVeiculos();
+        closeEditModal();
+    } catch (e) {
+        console.error(e);
+        showMessage("Erro ao atualizar veículo! Verifique se você é o dono.", "error");
+    } finally {
+        btn.classList.remove("loading");
+        btn.disabled = false;
+    }
+});
 
 
 // ===== Funções de Rota Alternativa (Completas) =====
@@ -335,17 +383,16 @@ function selectRoute(index) {
 
         if (parseInt(card.dataset.routeIndex) === index) {
             card.classList.add('selected');
-            const newCheckIcon = document.createElement('i');
-            newCheckIcon.className = 'fas fa-check-circle text-accent-green';
-            card.querySelector('.route-title').appendChild(newCheckIcon);
+            const checkIconNew = document.createElement('i');
+            checkIconNew.className = 'fas fa-check-circle text-accent-green';
+            card.querySelector('.route-title').appendChild(checkIconNew);
         }
     });
 
     showMessage(`Rota ${index + 1} selecionada. Distância atualizada.`, "info");
 }
 
-
-// ===== Calcular rota (Modificado para Rotas Alternativas) =====
+// ===== Calcular rota (Mantida) =====
 document.getElementById("calcularDistanciaBtn").addEventListener("click", () => {
     const origem = document.getElementById("origem").value.trim();
     const destino = document.getElementById("destino").value.trim();
@@ -363,9 +410,15 @@ document.getElementById("calcularDistanciaBtn").addEventListener("click", () => 
     if (parada2) waypoints.push({ location: parada2, stopover: true });
 
     const request = {
-        origin: origem, destination: destino, waypoints, optimizeWaypoints: true,
-        travelMode: google.maps.TravelMode.DRIVING, unitSystem: google.maps.UnitSystem.METRIC,
-        avoidHighways: false, avoidTolls: false, provideRouteAlternatives: true
+        origin: origem,
+        destination: destino,
+        waypoints,
+        optimizeWaypoints: true,
+        travelMode: google.maps.TravelMode.DRIVING,
+        unitSystem: google.maps.UnitSystem.METRIC,
+        avoidHighways: false,
+        avoidTolls: false,
+        provideRouteAlternatives: true
     };
 
     directionsService.route(request, (result, status) => {
@@ -386,17 +439,21 @@ document.getElementById("calcularDistanciaBtn").addEventListener("click", () => 
             if (originMarker) originMarker.setMap(null); if (destinationMarker) destinationMarker.setMap(null); if (parada1Marker) parada1Marker.setMap(null); if (parada2Marker) parada2Marker.setMap(null);
 
             showMessage(`Rota calculada: ${distanceKm.toFixed(2)} km (incluindo paradas). ${result.routes.length > 1 ? 'Veja as opções alternativas abaixo.' : ''}`);
+
             displayRouteOptions(result.routes);
 
-            const resultadoDiv = document.getElementById('resultado');
-            resultadoDiv.classList.remove('hidden');
-            setTimeout(() => { resultadoDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 300);
         } else { showMessage("Erro ao calcular rota. Verifique os endereços informados.", "error"); console.error("Erro na API de Direções:", status); }
     });
 });
 
+function updateDistanceDisplay(distancia, idaEVoltaChecked) {
+    const display = document.getElementById("distanciaDisplay");
+    if (!distancia || distancia === 0) { display.textContent = "-- km"; return; }
+    const distanciaFinal = idaEVoltaChecked ? distancia * 2 : distancia;
+    display.textContent = `${distanciaFinal.toFixed(2)} km${idaEVoltaChecked ? ' (Ida e Volta)' : ''}`;
+}
 
-// ===== Calcular custo (CORRIGIDO PARA RECARREGAR O VEÍCULO) =====
+// ===== Calcular custo (MODIFICADO para usar Modal) =====
 document.getElementById("calcularBtn").addEventListener("click", async () => {
     const veiculoId = document.getElementById("veiculo").value;
     const tipoCombustivel = document.getElementById("combustivel").value;
@@ -406,43 +463,28 @@ document.getElementById("calcularBtn").addEventListener("click", async () => {
 
     if (!veiculoId || !tipoCombustivel || isNaN(preco) || preco <= 0 || distanciaText === "-- km") { showMessage("Preencha todos os dados da viagem corretamente!", "error"); return; }
 
-    const btn = document.getElementById("calcularBtn"); btn.classList.add("loading"); btn.disabled = true;
-
-    // CORREÇÃO CRÍTICA: FORÇA A RECARGA DOS DADOS DO VEÍCULO A CADA CÁLCULO
-    try {
-        const docSnap = await getDoc(doc(db, "veiculos", veiculoId));
-        if (docSnap.exists()) {
-            veiculoSelecionadoData = { id: veiculoId, ...docSnap.data() };
-        } else {
-            showMessage("Veículo não encontrado no sistema.", "error");
-            veiculoSelecionadoData = null;
-            return;
-        }
-    } catch (e) {
-        showMessage("Erro ao carregar dados do veículo.", "error");
-        console.error(e);
-        veiculoSelecionadoData = null;
-        return;
+    // Tenta carregar os dados do veículo se ainda não estiverem na memória
+    if (!veiculoSelecionadoData || veiculoSelecionadoData.id !== veiculoId) {
+        try {
+            const docSnap = await getDoc(doc(db, "veiculos", veiculoId));
+            if (docSnap.exists()) veiculoSelecionadoData = { id: veiculoId, ...docSnap.data() };
+        } catch (e) { console.error(e); }
     }
+
+    if (!veiculoSelecionadoData) { showMessage("Erro: Selecione o veículo novamente.", "error"); return; }
 
     const eficiencia = veiculoSelecionadoData.eficiencias[tipoCombustivel];
-
-    if (isNaN(eficiencia) || eficiencia <= 0) {
-        showMessage(`Erro: Eficiência ${tipoCombustivel} não definida para o veículo.`, "error");
-        btn.classList.remove("loading"); btn.disabled = false;
-        return;
-    }
+    if (isNaN(eficiencia) || eficiencia <= 0) { showMessage(`Erro: Eficiência ${tipoCombustivel} não definida para o veículo.`, "error"); return; }
 
     const distanciaBase = distanciaIdaPura;
-    if (!distanciaBase || distanciaBase === 0) { showMessage("Calcule a rota primeiro!", "error"); }
+    if (!distanciaBase || distanciaBase === 0) { showMessage("Calcule a rota primeiro!", "error"); return; }
 
     const distancia_ajustada = distanciaBase * (idaEVoltaChecked ? 2 : 1);
-
+    const btn = document.getElementById("calcularBtn"); btn.classList.add("loading"); btn.disabled = true;
     try {
         const litrosNecessarios = distancia_ajustada / eficiencia;
         const custoTotal = litrosNecessarios * preco;
 
-        const resultadoDiv = document.getElementById("resultado");
         const resultadoValor = document.getElementById("resultadoValor");
         const infoViagem = idaEVoltaChecked ? ' (Ida e Volta)' : '';
         let combustivelNome = tipoCombustivel.charAt(0).toUpperCase() + tipoCombustivel.slice(1);
@@ -453,51 +495,35 @@ document.getElementById("calcularBtn").addEventListener("click", async () => {
             <div class="text-sm opacity-90 mt-1">${litrosNecessarios.toFixed(2)} ${unidade} • ${veiculoSelecionadoData.modelo}</div>
             <div class="text-xs opacity-80 mt-1">Distância Total: ${distancia_ajustada.toFixed(2)} km ${infoViagem}</div>
         `;
-        resultadoDiv.classList.remove("hidden");
-        setTimeout(() => { resultadoDiv.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 200);
-        showMessage("Custo calculado com sucesso!");
 
-    } catch (error) {
-        console.error("Erro ao calcular custo:", error);
-        showMessage("Erro ao calcular custo da viagem!", "error");
-    } finally {
-        btn.classList.remove("loading"); btn.disabled = false;
-    }
+        // Exibe o novo modal de resultado
+        document.getElementById("resultModal").classList.remove("hidden");
+        document.getElementById("resultModal").classList.add("flex");
+
+        showMessage("Custo calculado com sucesso!");
+    } catch (error) { console.error("Erro ao calcular custo:", error); showMessage("Erro ao calcular custo da viagem!", "error"); }
+    finally { btn.classList.remove("loading"); btn.disabled = false; }
 });
 
-function updateDistanceDisplay(distancia, idaEVoltaChecked) {
-    const display = document.getElementById("distanciaDisplay");
-    if (!distancia || distancia === 0) { display.textContent = "-- km"; return; }
-    const distanciaFinal = idaEVoltaChecked ? distancia * 2 : distancia;
-    display.textContent = `${distanciaFinal.toFixed(2)} km${idaEVoltaChecked ? ' (Ida e Volta)' : ''}`;
-}
+// ===== Fechar Modal de Resultado =====
+document.getElementById("closeResultModalBtn").addEventListener("click", () => {
+    document.getElementById("resultModal").classList.add("hidden");
+    document.getElementById("resultModal").classList.remove("flex");
+});
 
-
-// ===== Sidebar toggle mobile (CORRIGIDO) =====
-const sidebar = document.getElementById("sidebar");
-const overlay = document.getElementById("sidebarOverlay");
-const toggleBtn = document.getElementById("toggleSidebar");
-
-function toggleSidebar() {
+// ===== Sidebar toggle mobile (Mantida) =====
+document.getElementById("toggleSidebar").addEventListener("click", () => {
+    const sidebar = document.getElementById("sidebar");
+    const overlay = document.getElementById("sidebarOverlay");
     sidebar.classList.toggle("-translate-x-full");
     overlay.classList.toggle("hidden");
-
-    // Altera o ícone do botão
-    if (sidebar.classList.contains("-translate-x-full")) {
-        toggleBtn.innerHTML = '<i class="fas fa-bars text-gray-200"></i>';
-    } else {
-        toggleBtn.innerHTML = '<i class="fas fa-times text-gray-200"></i>';
-    }
-}
-
-toggleBtn.addEventListener("click", toggleSidebar);
-overlay.addEventListener("click", toggleSidebar);
-
-// Corrigido: Inicializar o estado da sidebar no mobile
-if (window.innerWidth <= 1024) {
+});
+document.getElementById("sidebarOverlay").addEventListener("click", () => {
+    const sidebar = document.getElementById("sidebar");
+    const overlay = document.getElementById("sidebarOverlay");
     sidebar.classList.add("-translate-x-full");
     overlay.classList.add("hidden");
-}
+});
 
 // ===== Inicialização (Mantida) =====
 document.addEventListener("DOMContentLoaded", () => {

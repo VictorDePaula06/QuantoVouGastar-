@@ -19,8 +19,10 @@
                         'inter': ['Inter', 'sans-serif'],
                     },
                     colors: {
+                        // Cores de Acento (Manter)
                         primary: {
-                            50: '#eff6ff', 500: '#3b82f6',
+                            50: '#e0e0e0',
+                            500: '#8a8a8a',
                         },
                         success: {
                             500: '#22c55e',
@@ -28,11 +30,14 @@
                         warning: {
                             500: '#f59e0b',
                         },
-                        // Cores Dark Mode
-                        'dark-bg': '#1f2937',
-                        'dark-card': '#374151',
-                        'accent-blue': '#60a5fa',
-                        'accent-green': '#34d399',
+                        // Cores DARK MODE APROFUNDADAS
+                        'dark-bg': '#000000',      // Preto absoluto
+                        'dark-card': '#0a0a0a',    // Preto muito escuro
+                        'dark-border': '#3b3b3b',  // NOVO: Cinza mais visível para bordas
+                        // Novos tons de cinza para Inputs e Detalhes
+                        'input-bg-darker': '#151515',
+                        'accent-gray': '#4a4a4a',
+                        'light-gray-text': '#b0b0b0',
                     }
                 }
             }
@@ -40,52 +45,50 @@
     </script>
 </head>
 
-<body class="font-inter bg-dark-bg min-h-screen text-gray-100">
-
-    <header class="bg-dark-card shadow-lg border-b border-gray-700 fixed w-full top-0 z-40">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<body class="font-inter bg-dark-bg min-h-screen text-gray-200">
+    <header class="bg-dark-card shadow-lg border-b border-dark-border fixed w-full top-0 z-40">
+        <div class="max-w-10xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
+
                 <div class="flex items-center space-x-3">
-                    <div class="bg-accent-blue p-2 rounded-lg shadow-md">
-                        <i class="fas fa-gas-pump text-white text-xl"></i>
-                    </div>
-                    <div>
-                        <h1 class="text-xl font-bold text-white hidden sm:block">Calculadora de Combustível</h1>
-                        <h1 class="text-xl font-bold text-white sm:hidden">Combustível</h1>
-                        <p class="text-xs text-gray-400">Planeje suas viagens</p>
-                    </div>
-                </div>
-
-                <div id="authStatus" class="flex items-center space-x-2">
-                    <div id="userInfo" class="text-right hidden md:block">
-                        <p class="text-sm font-medium text-gray-200 leading-tight" id="userName">Usuário</p>
-                        <p class="text-xs text-gray-400" id="userEmail"></p>
-                    </div>
-
-                    <button id="authBtn" class="btn-auth-header">
-                        <i class="fab fa-google text-lg"></i>
-                        <span class="ml-2 hidden md:inline">Entrar</span>
-                    </button>
-
                     <button id="toggleSidebar"
-                        class="lg:hidden bg-gray-600 p-2 rounded-lg hover:bg-gray-500 transition-colors ml-2">
-                        <i class="fas fa-bars text-gray-200"></i>
+                        class="lg:hidden bg-input-bg-darker p-2.5 rounded-lg hover:bg-dark-border transition-colors text-white">
+                        <i class="fas fa-bars text-lg text-gray-200"></i>
                     </button>
+
+                    <img src="imgs/logo3.png" alt="Logo QuantovouGastar" class="h-14 w-auto">
+
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-50 hidden sm:block">Calculadora de Combustível</h1>
+                        <h1 class="text-lg font-bold text-gray-50 sm:hidden">Combustível</h1>
+                        <p class="text-xs text-light-gray-text hidden sm:block">Planeje suas viagens</p>
+                    </div>
                 </div>
+
+                <div id="authStatus" class="flex items-center">
+
+                    <button id="authBtn"
+                        class="bg-input-bg-darker p-2.5 rounded-full hover:bg-dark-border transition-colors text-white"
+                        title="Entrar/Sair">
+                        <i class="fab fa-google text-xl" id="authIcon"></i>
+                    </button>
+
+                </div>
+
             </div>
         </div>
     </header>
 
     <div class="flex flex-1 pt-16 h-full min-h-screen">
 
-        <div id="sidebar" class="bg-dark-card shadow-2xl border-r border-gray-700 overflow-y-auto 
-        transform -translate-x-full fixed top-16 left-0 z-30 w-full max-w-sm 
+        <div id="sidebar" class="bg-dark-card shadow-2xl border-r border-blue-700 overflow-y-auto 
+        transform -translate-x-full fixed left-0 z-30 w-full max-w-sm 
         lg:translate-x-0 lg:relative lg:w-96 lg:shadow-none 
-        transition-transform duration-300 ease-in-out" style="height: calc(100vh - 4rem);">
+        transition-transform duration-300 ease-in-out glass-effect" style="height: calc(100vh - 4rem);">
 
             <div class="p-4 space-y-4 pb-20">
 
-                <div class="card-section border border-accent-blue/50">
+                <div class="card-section border border-accent-blue/50 glass-card">
                     <h2 class="section-title text-accent-blue">
                         <i class="fas fa-car mr-2"></i>
                         Cadastrar Veículo
@@ -117,7 +120,7 @@
                     </div>
                 </div>
 
-                <div class="card-section border border-gray-600">
+                <div class="card-section border border-gray-600 glass-card">
                     <h2 class="section-title text-gray-200">
                         <i class="fas fa-list mr-2"></i> Meus Veículos
                     </h2>
@@ -132,7 +135,7 @@
                     </div>
                 </div>
 
-                <div class="card-section border border-accent-green/50">
+                <div class="card-section border border-accent-green/50 glass-card">
                     <h2 class="section-title text-accent-green">
                         <i class="fas fa-route mr-2"></i> Planejar Viagem
                     </h2>
@@ -205,7 +208,7 @@
                     </div>
                 </div>
 
-                <div class="card-section border border-gray-600">
+                <div class="card-section border border-gray-600 glass-card">
                     <h3 class="section-title text-gray-200">
                         <i class="fas fa-info-circle mr-2"></i> Informações e Custo
                     </h3>
@@ -224,14 +227,7 @@
                     </div>
                 </div>
 
-                <div id="resultado"
-                    class="hidden bg-accent-blue text-white p-4 rounded-xl shadow-lg animate-fade-in-up">
-                    <div class="text-center">
-                        <i class="fas fa-money-bill-wave text-2xl mb-2"></i>
-                        <p class="text-sm opacity-90">Custo estimado da viagem</p>
-                        <p id="resultadoValor" class="text-2xl font-bold"></p>
-                    </div>
-                </div>
+                <!-- A div #resultado foi removida daqui e será usada no modal -->
             </div>
         </div>
 
@@ -246,9 +242,10 @@
         </div>
     </div>
 
+    <!-- Modal de Edição (Mantido) -->
     <div id="editModal" class="fixed inset-0 bg-black bg-opacity-70 hidden items-center justify-center p-4 z-50">
         <div
-            class="bg-dark-card p-6 rounded-xl shadow-2xl w-full max-w-md transform transition-all border border-gray-700">
+            class="bg-dark-card p-6 rounded-xl shadow-2xl w-full max-w-md transform transition-all border border-gray-700 glass-card">
             <h3 class="text-xl font-bold mb-4 flex items-center text-accent-blue">
                 <i class="fas fa-edit text-accent-blue mr-2"></i>
                 Editar Veículo
@@ -288,6 +285,29 @@
                     class="px-4 py-2 bg-accent-blue hover:bg-blue-500 text-white rounded-lg transition-colors">
                     Salvar
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOVO: Modal de Resultado de Cálculo (Mobile Fix) -->
+    <div id="resultModal" class="fixed inset-0 bg-black bg-opacity-70 hidden items-center justify-center p-4 z-50">
+        <div
+            class="bg-dark-card p-6 rounded-xl shadow-2xl w-full max-w-md transform transition-all border border-gray-700 glass-card">
+            <div class="flex justify-between items-start mb-4">
+                <h3 class="text-xl font-bold flex items-center text-accent-green">
+                    <i class="fas fa-calculator mr-2"></i>
+                    Custo da Viagem
+                </h3>
+                <button id="closeResultModalBtn" class="text-gray-400 hover:text-white transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div id="resultado" class="bg-accent-blue text-white p-4 rounded-xl shadow-lg animate-fade-in-up">
+                <div class="text-center">
+                    <i class="fas fa-money-bill-wave text-2xl mb-2"></i>
+                    <p class="text-sm opacity-90">Custo estimado da viagem</p>
+                    <p id="resultadoValor" class="text-2xl font-bold"></p>
+                </div>
             </div>
         </div>
     </div>

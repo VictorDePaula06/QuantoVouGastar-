@@ -1,5 +1,5 @@
 /* ===============================
-    Estilos personalizados - Calculadora de Combustível (Dark Mode)
+    Estilos personalizados - Calculadora de Combustível (Dark Mode + Glassmorphism)
     =============================== */
 
 /* Animações e transições suaves */
@@ -8,22 +8,26 @@
 }
 
 /* Scrollbar personalizada */
-::-webkit-scrollbar {
-    width: 6px;
-}
-
 ::-webkit-scrollbar-track {
-    background: #1f2937;
+    background: #000000;
+    /* dark-bg */
     border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #4b5563;
+    background: #151515;
+    /* input-bg-darker */
     border-radius: 3px;
 }
 
-::-webkit-scrollbar-thumb:hover {
-    background: #6b7280;
+/* Estilos de Input e Label */
+.input-field {
+    /* ...outras propriedades... */
+    border: 1px solid #1c1c1c;
+    /* dark-border */
+    background-color: #151515;
+    /* input-bg-darker */
+    /* ...outras propriedades... */
 }
 
 /* ===============================
@@ -37,6 +41,18 @@
 
     to {
         transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
         opacity: 1;
     }
 }
@@ -61,13 +77,32 @@
 }
 
 /* ===============================
+    Efeito Glassmorphism
+    =============================== */
+
+.glass-effect {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    background-color: rgba(10, 10, 10, 0.95);
+    /* dark-card (#0a0a0a) com mais opacidade */
+}
+
+.glass-card {
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    background-color: rgba(10, 10, 10, 0.9);
+    /* dark-card com opacidade */
+    /* Usando a variável Tailwind para a borda */
+    border: 1px solid var(--color-dark-border);
+}
+
+/* ===============================
     Design de Componentes
     =============================== */
 
 /* Estilos de Seção (Containers de Formulário) */
 .card-section {
-    background: #374151;
-    /* dark-card */
+    /* Removendo o background-color fixo para usar o glass-card */
     border-radius: 12px;
     padding: 1rem;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
@@ -81,7 +116,6 @@
     align-items: center;
     padding-bottom: 0.5rem;
     border-bottom: 1px solid #4b5563;
-    /* gray-600 */
 }
 
 /* Estilos de Input e Label */
@@ -90,17 +124,18 @@
     font-size: 0.875rem;
     font-weight: 500;
     color: #d1d5db;
-    /* text-gray-300 */
     margin-bottom: 0.25rem;
 }
+
+
 
 .input-field {
     width: 100%;
     padding: 0.6rem 0.75rem;
-    border: 1px solid #4b5563;
-    /* gray-600 */
-    background-color: #4b5563;
-    /* gray-600 */
+    border: 1px solid #404040;
+    /* Usando dark-border */
+    background-color: #262626;
+    /* Usando dark-input-bg */
     color: #ffffff;
     border-radius: 0.5rem;
     font-size: 1rem;
@@ -109,11 +144,9 @@
 
 .input-field:focus {
     box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.5);
-    /* accent-blue/50 */
     border-color: #60a5fa;
-    /* accent-blue */
-    background-color: #374151;
-    /* dark-card */
+    background-color: #1a1a1a;
+    /* dark-card no foco */
     outline: none;
 }
 
@@ -168,7 +201,6 @@
 /* Estilo para o botão/ícone de Login/Logout na Header */
 .btn-auth-header {
     background-color: #60a5fa;
-    /* accent-blue */
     color: white;
     padding: 0.5rem 0.75rem;
     border-radius: 0.5rem;
@@ -200,9 +232,7 @@
     =============================== */
 .vehicle-card {
     background: #4b5563;
-    /* gray-600 */
     border: 1px solid #6b7280;
-    /* gray-500 */
     border-radius: 8px;
     padding: 12px;
     margin-bottom: 8px;
@@ -213,13 +243,11 @@
 .vehicle-card:hover {
     box-shadow: 0 1px 6px rgba(96, 165, 250, 0.3);
     background: #6b7280;
-    /* gray-500 */
 }
 
 .vehicle-card.inactive {
     opacity: 0.5;
     background: #374151;
-    /* dark-card */
     border-color: #4b5563;
 }
 
@@ -296,9 +324,7 @@
 /* Estilos para Rotas Alternativas */
 .route-option-card {
     background: #4b5563;
-    /* gray-600 */
     border: 1px solid #6b7280;
-    /* gray-500 */
     border-radius: 8px;
     padding: 12px;
     margin-bottom: 8px;
@@ -307,17 +333,14 @@
 }
 
 .route-option-card:hover {
+    box-shadow: 0 1px 6px rgba(96, 165, 250, 0.3);
     background: #6b7280;
-    /* gray-500 */
-    box-shadow: 0 2px 8px rgba(96, 165, 250, 0.2);
 }
 
 .route-option-card.selected {
     border-color: #60a5fa;
-    /* accent-blue */
     border-width: 2px;
     background: #374151;
-    /* dark-card */
 }
 
 .route-option-card .route-title {
@@ -350,5 +373,10 @@
 
     .card-section {
         padding: 1rem;
+    }
+
+    .text-xl {
+        font-size: 0.75rem;
+
     }
 }
