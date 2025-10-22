@@ -31,6 +31,7 @@ let veiculoSelecionadoData = null; // Armazena o veículo selecionado (Dados atu
 let currentUserId = null;
 let showInactive = false;
 let currentRoutesResult = null; // Armazena o resultado completo da rota
+let currentTollCost = 0; // NOVO: Custo do pedágio da rota selecionada
 
 // Variável para a Edição (expõe globalmente)
 window.editId = null;
@@ -200,10 +201,12 @@ async function loadVeiculos() {
             const ef_gas = v.eficiencias?.gasolina || v.eficiencia || 0;
             const ef_eta = v.eficiencias?.etanol || 0;
             const ef_gnv = v.eficiencias?.gnv || 0;
+            const ef_die = v.eficiencias?.diesel || 0; // NOVO: Diesel
 
             let eficienciaText = `${ef_gas} km/l (G)`;
             if (ef_eta > 0) eficienciaText += ` / ${ef_eta} km/l (E)`;
             if (ef_gnv > 0) eficienciaText += ` / ${ef_gnv} km/m³ (GNV)`;
+            if (ef_die > 0) eficienciaText += ` / ${ef_die} km/l (D)`; // NOVO: Diesel
 
             const li = document.createElement("div");
             li.className = `vehicle-card ${v.ativo ? '' : 'inactive'}`;
@@ -214,7 +217,7 @@ async function loadVeiculos() {
                         <div class="text-sm text-gray-400">${eficienciaText}</div>
                     </div>
                     <div class="flex space-x-2">
-                        <button class="px-3 py-1 text-xs bg-accent-blue/20 text-accent-blue hover:bg-accent-blue/40 rounded-lg" onclick="editVeiculo('${v.id}','${v.modelo}',${ef_gas},${ef_eta},${ef_gnv})"><i class="fas fa-edit mr-1"></i>Editar</button>
+                        <button class="px-3 py-1 text-xs bg-accent-blue/20 text-accent-blue hover:bg-accent-blue/40 rounded-lg" onclick="editVeiculo('${v.id}','${v.modelo}',${ef_gas},${ef_eta},${ef_gnv},${ef_die})"><i class="fas fa-edit mr-1"></i>Editar</button>
                         <button class="px-3 py-1 text-xs ${v.ativo ? 'bg-red-500/20 text-red-400 hover:bg-red-500/40' : 'bg-accent-green/20 text-accent-green hover:bg-accent-green/40'} rounded-lg" onclick="toggleAtivo('${v.id}',${v.ativo})">
                             <i class="fas fa-${v.ativo ? 'times' : 'check'} mr-1"></i>${v.ativo ? 'Inativar' : 'Ativar'}
                         </button>
@@ -244,13 +247,14 @@ async function loadVeiculos() {
 }
 
 // Expor globalmente (essencial)
-window.editVeiculo = function (id, modelo, ef_gas, ef_eta, ef_gnv) {
+window.editVeiculo = function (id, modelo, ef_gas, ef_eta, ef_gnv, ef_die) { // NOVO: ef_die
     if (!currentUserId) { showMessage("Faça login para editar veículos.", "error"); return; }
     window.editId = id;
     document.getElementById("editModelo").value = modelo;
     document.getElementById("editEficienciaGasolina").value = ef_gas;
     document.getElementById("editEficienciaEtanol").value = ef_eta > 0 ? ef_eta : '';
     document.getElementById("editEficienciaGnv").value = ef_gnv > 0 ? ef_gnv : '';
+    document.getElementById("editEficienciaDiesel").value = ef_die > 0 ? ef_die : ''; // NOVO: Diesel
     document.getElementById("editModal").classList.remove("hidden");
     document.getElementById("editModal").classList.add("flex");
 };
@@ -267,6 +271,35 @@ document.getElementById("toggleInativosBtn").addEventListener("click", () => {
     loadVeiculos();
 });
 
+// ===== Geolocalização (NOVO) =====
+document.getElementById("geolocalizacaoBtn").addEventListener("click", () => {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const latlng = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude,
+                };
+                const geocoder = new google.maps.Geocoder();
+                geocoder.geocode({ location: latlng }, (results, status) => {
+                    if (status === "OK" && results[0]) {
+                        document.getElementById("origem").value = results[0].formatted_address;
+                        showMessage("Localização atual preenchida!", "info");
+                    } else {
+                        showMessage("Não foi possível obter o endereço da sua localização.", "error");
+                    }
+                });
+            },
+            (error) => {
+                console.error("Erro na geolocalização:", error);
+                showMessage("Permissão de localização negada ou indisponível.", "error");
+            }
+        );
+    } else {
+        showMessage("Seu navegador não suporta geolocalização.", "error");
+    }
+});
+
 // ===== Add vehicle =====
 document.getElementById("addVeiculoBtn").addEventListener("click", async () => {
     if (!currentUserId) { showMessage("Faça login para cadastrar um veículo.", "error"); return; }
@@ -274,13 +307,30 @@ document.getElementById("addVeiculoBtn").addEventListener("click", async () => {
     const ef_gas = parseFloat(document.getElementById("novaEficienciaGasolina").value.trim());
     const ef_eta = parseFloat(document.getElementById("novaEficienciaEtanol").value.trim() || 0);
     const ef_gnv = parseFloat(document.getElementById("novaEficienciaGnv").value.trim() || 0);
+    const ef_die = parseFloat(document.getElementById("novaEficienciaDiesel").value.trim() || 0); // NOVO: Diesel
+
     if (!modelo || isNaN(ef_gas) || ef_gas <= 0) { showMessage("Preencha o Modelo e a Eficiência Gasolina corretamente!", "error"); return; }
+
     const btn = document.getElementById("addVeiculoBtn");
     btn.classList.add("loading"); btn.disabled = true;
     try {
-        await addDoc(collection(db, "veiculos"), { modelo, userId: currentUserId, eficiencias: { gasolina: ef_gas, etanol: isNaN(ef_eta) ? 0 : ef_eta, gnv: isNaN(ef_gnv) ? 0 : ef_gnv }, ativo: true });
+        await addDoc(collection(db, "veiculos"), {
+            modelo,
+            userId: currentUserId,
+            eficiencias: {
+                gasolina: ef_gas,
+                etanol: isNaN(ef_eta) ? 0 : ef_eta,
+                gnv: isNaN(ef_gnv) ? 0 : ef_gnv,
+                diesel: isNaN(ef_die) ? 0 : ef_die // NOVO: Diesel
+            },
+            ativo: true
+        });
         showMessage("Veículo cadastrado com sucesso!");
-        document.getElementById("novoModelo").value = ""; document.getElementById("novaEficienciaGasolina").value = ""; document.getElementById("novaEficienciaEtanol").value = ""; document.getElementById("novaEficienciaGnv").value = "";
+        document.getElementById("novoModelo").value = "";
+        document.getElementById("novaEficienciaGasolina").value = "";
+        document.getElementById("novaEficienciaEtanol").value = "";
+        document.getElementById("novaEficienciaGnv").value = "";
+        document.getElementById("novaEficienciaDiesel").value = ""; // NOVO: Diesel
         loadVeiculos();
     } catch (e) { console.error(e); showMessage("Erro ao cadastrar veículo!", "error"); } finally { btn.classList.remove("loading"); btn.disabled = false; }
 });
@@ -300,13 +350,23 @@ document.getElementById("saveEditBtn").addEventListener("click", async () => {
     const ef_gas = parseFloat(document.getElementById("editEficienciaGasolina").value);
     const ef_eta = parseFloat(document.getElementById("editEficienciaEtanol").value || 0);
     const ef_gnv = parseFloat(document.getElementById("editEficienciaGnv").value || 0);
+    const ef_die = parseFloat(document.getElementById("editEficienciaDiesel").value || 0); // NOVO: Diesel
+
     if (!modelo || isNaN(ef_gas) || ef_gas <= 0) { showMessage("Preencha o Modelo e a Eficiência Gasolina corretamente!", "error"); return; }
 
     const btn = document.getElementById("saveEditBtn");
     btn.classList.add("loading"); btn.disabled = true;
 
     try {
-        await updateDoc(doc(db, "veiculos", window.editId), { modelo, eficiencias: { gasolina: ef_gas, etanol: isNaN(ef_eta) ? 0 : ef_eta, gnv: isNaN(ef_gnv) ? 0 : ef_gnv } });
+        await updateDoc(doc(db, "veiculos", window.editId), {
+            modelo,
+            eficiencias: {
+                gasolina: ef_gas,
+                etanol: isNaN(ef_eta) ? 0 : ef_eta,
+                gnv: isNaN(ef_gnv) ? 0 : ef_gnv,
+                diesel: isNaN(ef_die) ? 0 : ef_die // NOVO: Diesel
+            }
+        });
         showMessage("Veículo atualizado com sucesso!");
         loadVeiculos();
         closeEditModal();
@@ -335,9 +395,24 @@ function displayRouteOptions(routes) {
             const durationText = formatDuration(totalDurationSeconds);
             const isSelected = directionsRenderer.getRouteIndex() === index;
 
+            // NOVO: Cálculo do custo do pedágio para a rota
+            let tollCost = 0;
+            if (route.fare && route.fare.value) {
+                // A API de Direções do Google Maps não retorna o custo do pedágio diretamente no Brasil,
+                // mas sim o custo total da rota (fare). No entanto, o Routes API (que não está em JS)
+                // retorna o custo do pedágio. Para a API de Direções, vamos apenas verificar se há
+                // pedágios a serem evitados.
+                // Para simular o custo, vamos usar uma variável global que será atualizada na seleção.
+                // A API de Direções não fornece o custo exato.
+                // Vamos usar a propriedade 'tolls' na rota para indicar a presença.
+                const hasTolls = route.warnings.some(w => w.includes('tolls'));
+                tollCost = hasTolls ? -1 : 0; // -1 indica pedágio presente, mas custo desconhecido
+            }
+
             const card = document.createElement('div');
             card.className = `route-option-card ${isSelected ? 'selected' : ''}`;
             card.dataset.routeIndex = index;
+            card.dataset.tollCost = tollCost; // Armazena o custo/status do pedágio
             card.innerHTML = `
                 <div class="route-title flex justify-between items-center">
                     <span>Rota ${index + 1} ${route.summary ? `(${route.summary})` : ''}</span>
@@ -346,6 +421,7 @@ function displayRouteOptions(routes) {
                 <div class="route-details">
                     Distância: ${distanceKm} km | Tempo: ${durationText}
                 </div>
+                ${tollCost === -1 ? '<div class="toll-info-card"><i class="fas fa-road mr-1"></i> Pedágio: <span class="toll-value">Presente (Custo Desconhecido)</span></div>' : ''}
             `;
             card.addEventListener('click', () => selectRoute(index));
             list.appendChild(card);
@@ -372,6 +448,10 @@ function selectRoute(index) {
     const selectedRoute = currentRoutesResult.routes[index];
     const totalDistanceMeters = selectedRoute.legs.reduce((sum, leg) => sum + leg.distance.value, 0);
     distanciaIdaPura = totalDistanceMeters / 1000;
+
+    // NOVO: Atualiza o custo do pedágio
+    const selectedTollCost = parseFloat(document.querySelector(`.route-option-card[data-route-index="${index}"]`).dataset.tollCost);
+    currentTollCost = selectedTollCost === -1 ? 0 : selectedTollCost; // Se for -1 (desconhecido), trata como 0 para o cálculo
 
     const idaEVoltaChecked = document.getElementById("idaEVolta")?.checked || false;
     updateDistanceDisplay(distanciaIdaPura, idaEVoltaChecked);
@@ -404,6 +484,7 @@ document.getElementById("calcularDistanciaBtn").addEventListener("click", () => 
     document.getElementById('routeOptionsContainer').classList.add('hidden');
     document.getElementById('routeOptionsList').innerHTML = '';
     currentRoutesResult = null;
+    currentTollCost = 0; // Reseta o custo do pedágio
 
     const waypoints = [];
     if (parada1) waypoints.push({ location: parada1, stopover: true });
@@ -441,6 +522,9 @@ document.getElementById("calcularDistanciaBtn").addEventListener("click", () => 
             showMessage(`Rota calculada: ${distanceKm.toFixed(2)} km (incluindo paradas). ${result.routes.length > 1 ? 'Veja as opções alternativas abaixo.' : ''}`);
 
             displayRouteOptions(result.routes);
+
+            // Seleciona a primeira rota por padrão e atualiza o custo do pedágio
+            selectRoute(0);
 
         } else { showMessage("Erro ao calcular rota. Verifique os endereços informados.", "error"); console.error("Erro na API de Direções:", status); }
     });
@@ -483,17 +567,28 @@ document.getElementById("calcularBtn").addEventListener("click", async () => {
     const btn = document.getElementById("calcularBtn"); btn.classList.add("loading"); btn.disabled = true;
     try {
         const litrosNecessarios = distancia_ajustada / eficiencia;
-        const custoTotal = litrosNecessarios * preco;
+        const custoCombustivel = litrosNecessarios * preco;
+
+        // NOVO: Adiciona o custo do pedágio (se conhecido)
+        const custoTotal = custoCombustivel + (currentTollCost * (idaEVoltaChecked ? 2 : 1));
 
         const resultadoValor = document.getElementById("resultadoValor");
         const infoViagem = idaEVoltaChecked ? ' (Ida e Volta)' : '';
         let combustivelNome = tipoCombustivel.charAt(0).toUpperCase() + tipoCombustivel.slice(1);
         const unidade = (tipoCombustivel === 'gnv') ? 'm³ de GNV' : 'L de ' + combustivelNome;
 
+        let tollInfoHtml = '';
+        if (currentTollCost > 0) {
+            tollInfoHtml = `<div class="text-xs opacity-80 mt-1">Pedágio: R$ ${currentTollCost.toFixed(2)}</div>`;
+        } else if (currentTollCost === 0 && currentRoutesResult && currentRoutesResult.routes[directionsRenderer.getRouteIndex()].warnings.some(w => w.includes('tolls'))) {
+            tollInfoHtml = `<div class="text-xs opacity-80 mt-1">Pedágio: Presente (Custo Desconhecido)</div>`;
+        }
+
         resultadoValor.innerHTML = `
             <div>R$ ${custoTotal.toFixed(2)}</div>
             <div class="text-sm opacity-90 mt-1">${litrosNecessarios.toFixed(2)} ${unidade} • ${veiculoSelecionadoData.modelo}</div>
             <div class="text-xs opacity-80 mt-1">Distância Total: ${distancia_ajustada.toFixed(2)} km ${infoViagem}</div>
+            ${tollInfoHtml}
         `;
 
         // Exibe o novo modal de resultado

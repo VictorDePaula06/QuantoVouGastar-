@@ -353,6 +353,23 @@
     color: #d1d5db;
 }
 
+/* Estilo para a exibição do pedágio */
+.toll-info-card {
+    background: #1a1a1a;
+    border: 1px solid #4a4a4a;
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 10px;
+    color: #ffffff;
+    font-size: 0.9rem;
+}
+
+.toll-info-card .toll-value {
+    font-weight: 700;
+    color: #f59e0b;
+    /* Cor de aviso/atenção */
+}
+
 /* ===============================
     Layout Geral
     =============================== */

@@ -113,6 +113,12 @@
                             <input type="number" id="novaEficienciaGnv" step="0.1" placeholder="Ex: 13.0 (Opcional)"
                                 class="input-field">
                         </div>
+                        <!-- NOVO: Campo para Diesel -->
+                        <div>
+                            <label for="novaEficienciaDiesel" class="input-label">Eficiência Diesel (km/l)</label>
+                            <input type="number" id="novaEficienciaDiesel" step="0.1" placeholder="Ex: 10.0 (Opcional)"
+                                class="input-field">
+                        </div>
 
                         <button id="addVeiculoBtn" class="w-full btn-primary">
                             <i class="fas fa-plus mr-2"></i> Adicionar Veículo
@@ -153,14 +159,22 @@
                                 <option value="gasolina">Gasolina</option>
                                 <option value="etanol">Etanol</option>
                                 <option value="gnv">GNV</option>
+                                <option value="diesel">Diesel</option>
                             </select>
                         </div>
 
                         <div class="space-y-4 pt-4 border-t border-gray-700">
                             <div>
                                 <label for="origem" class="input-label">Origem</label>
-                                <input type="text" id="origem" placeholder="Digite o local de origem"
-                                    class="input-field">
+                                <div class="flex space-x-2">
+                                    <input type="text" id="origem" placeholder="Digite o local de origem"
+                                        class="input-field flex-grow">
+                                    <!-- NOVO: Botão de Geolocalização -->
+                                    <button id="geolocalizacaoBtn" class="btn-primary p-2.5 flex-shrink-0"
+                                        title="Usar Localização Atual">
+                                        <i class="fas fa-location-arrow"></i>
+                                    </button>
+                                </div>
                             </div>
                             <div>
                                 <label for="destino" class="input-label">Destino</label>
@@ -272,6 +286,13 @@
                     <label for="editEficienciaGnv" class="block text-sm font-medium text-gray-200 mb-1">Eficiência GNV
                         (km/m³)</label>
                     <input type="number" id="editEficienciaGnv" step="0.1"
+                        class="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent transition-all bg-gray-700 text-white">
+                </div>
+                <!-- NOVO: Campo para Diesel na Edição -->
+                <div>
+                    <label for="editEficienciaDiesel" class="block text-sm font-medium text-gray-200 mb-1">Eficiência
+                        Diesel (km/l)</label>
+                    <input type="number" id="editEficienciaDiesel" step="0.1"
                         class="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent transition-all bg-gray-700 text-white">
                 </div>
 
