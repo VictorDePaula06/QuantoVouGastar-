@@ -1,0 +1,6 @@
+# Exclui arquivos de configuração sensíveis e de IDE
+.env
+.DS_Store
+node_modules/
+/dist/
+*.log

@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Combustível - Quanto Vou Gastar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        // Cores de Acento (Manter)
+                        primary: {
+                            50: '#e0e0e0',
+                            500: '#8a8a8a',
+                        },
+                        success: {
+                            500: '#22c55e',
+                        },
+                        warning: {
+                            500: '#f59e0b',
+                        },
+                        // Cores DARK MODE APROFUNDADAS
+                        'dark-bg': '#000000',      // Preto absoluto
+                        'dark-card': '#0a0a0a',    // Preto muito escuro
+                        'dark-border': '#3b3b3b',  // NOVO: Cinza mais visível para bordas
+                        // Novos tons de cinza para Inputs e Detalhes
+                        'input-bg-darker': '#151515',
+                        'accent-gray': '#4a4a4a',
+                        'light-gray-text': '#b0b0b0',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="font-inter bg-dark-card min-h-screen text-gray-200">
+    <header class="bg-dark-card shadow-lg border-b border-dark-border fixed w-full top-0 z-40">
+        <div class="max-w-10xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+
+                <div class="flex items-center space-x-3">
+                    <button id="toggleSidebar"
+                        class="lg:hidden bg-input-bg-darker p-2.5 rounded-lg hover:bg-dark-border transition-colors text-white">
+                        <i class="fas fa-bars text-lg text-gray-200"></i>
+                    </button>
+
+                    <img src="Imgs/logo7.png" alt="Logo QuantovouGastar" class="h-14 w-auto" id="mainLogo">
+
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-50 hidden sm:block">Calculadora de Combustível</h1>
+                        <h1 class="text-lg font-bold text-gray-50 sm:hidden">Combustível</h1>
+                        <p class="text-xs text-light-gray-text hidden sm:block">Planeje suas viagens</p>
+                    </div>
+                </div>
+
+                <div id="authStatus" class="flex items-center">
+
+                    <button id="authBtn"
+                        class="bg-input-bg-darker p-2.5 rounded-full hover:bg-dark-border transition-colors text-white"
+                        title="Entrar/Sair">
+                        <i class="fab fa-google text-xl" id="authIcon"></i>
+                    </button>
+
+                </div>
+
+            </div>
+        </div>
+    </header>
+
+    <div class="flex flex-1 pt-16 h-full min-h-screen">
+
+        <div id="sidebar" class="bg-dark-card shadow-2xl border-r border-blue-700 overflow-y-auto 
+        transform -translate-x-full fixed left-0 z-30 w-full max-w-sm 
+        lg:translate-x-0 lg:relative lg:w-96 lg:shadow-none 
+        transition-transform duration-300 ease-in-out glass-effect" style="height: calc(100vh - 4rem);">
+
+            <div class="p-4 space-y-4" style="padding-bottom: 25%;">
+
+                <div class="card-section border border-accent-blue/50 glass-card">
+                    <h2 class="section-title text-accent-blue">
+                        <i class="fas fa-car mr-2"></i>
+                        Cadastrar Veículo
+                    </h2>
+                    <div class="space-y-3">
+                        <div>
+                            <label for="novoModelo" class="input-label">Modelo do Veículo</label>
+                            <input type="text" id="novoModelo" placeholder="Ex: Honda Civic" class="input-field">
+                        </div>
+                        <div>
+                            <label for="novaEficienciaGasolina" class="input-label">Eficiência Gasolina (km/l)</label>
+                            <input type="number" id="novaEficienciaGasolina" step="0.1"
+                                placeholder="Ex: 12.0 (Opcional)" class="input-field">
+                        </div>
+                        <div>
+                            <label for="novaEficienciaEtanol" class="input-label">Eficiência Etanol (km/l)</label>
+                            <input type="number" id="novaEficienciaEtanol" step="0.1" placeholder="Ex: 8.5 (Opcional)"
+                                class="input-field">
+                        </div>
+                        <div>
+                            <label for="novaEficienciaGnv" class="input-label">Eficiência GNV (km/m³)</label>
+                            <input type="number" id="novaEficienciaGnv" step="0.1" placeholder="Ex: 13.0 (Opcional)"
+                                class="input-field">
+                        </div>
+                        <!-- NOVO: Campo para Diesel -->
+                        <div>
+                            <label for="novaEficienciaDiesel" class="input-label">Eficiência Diesel (km/l)</label>
+                            <input type="number" id="novaEficienciaDiesel" step="0.1" placeholder="Ex: 10.0 (Opcional)"
+                                class="input-field">
+                        </div>
+
+                        <button id="addVeiculoBtn" class="w-full btn-primary">
+                            <i class="fas fa-plus mr-2"></i> Adicionar Veículo
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card-section border border-gray-600 glass-card">
+                    <h2 class="section-title text-gray-200">
+                        <i class="fas fa-list mr-2"></i> Meus Veículos
+                    </h2>
+                    <div class="flex flex-col space-y-3">
+                        <div id="veiculosList" class="space-y-2 w-full">
+                            <div class="p-4 text-center text-gray-500">Faça login para gerenciar seus veículos.</div>
+                        </div>
+                        <button id="toggleInativosBtn"
+                            class="px-3 py-1 text-xs bg-gray-600 text-gray-300 hover:bg-gray-500 rounded-lg transition-colors flex items-center justify-center shadow-md w-full hidden"
+                            title="Mostrar/Esconder veículos inativos">
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card-section border border-accent-green/50 glass-card">
+                    <h2 class="section-title text-accent-green">
+                        <i class="fas fa-route mr-2"></i> Planejar Viagem
+                    </h2>
+                    <div class="space-y-3">
+                        <div>
+                            <label for="veiculo" class="input-label">Selecione o Veículo</label>
+                            <select id="veiculo" class="input-field">
+                                <option value="">Escolha um veículo</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="combustivel" class="input-label">Combustível Utilizado</label>
+                            <select id="combustivel" class="input-field">
+                                <option value="gasolina">Gasolina</option>
+                                <option value="etanol">Etanol</option>
+                                <option value="gnv">GNV</option>
+                                <option value="diesel">Diesel</option>
+                            </select>
+                        </div>
+
+                        <div class="space-y-4 pt-4 border-t border-gray-700">
+                            <div>
+                                <label for="origem" class="input-label">Origem</label>
+                                <div class="flex space-x-2">
+                                    <input type="text" id="origem" placeholder="Digite o local de origem"
+                                        class="input-field flex-grow">
+                                    <!-- NOVO: Botão de Geolocalização -->
+                                    <button id="geolocalizacaoBtn" class="btn-primary p-2.5 flex-shrink-0"
+                                        title="Usar Localização Atual">
+                                        <i class="fas fa-location-arrow"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="destino" class="input-label">Destino</label>
+                                <input type="text" id="destino" placeholder="Digite o local de destino"
+                                    class="input-field">
+                            </div>
+                        </div>
+
+
+                        <div class="space-y-3 border border-warning-500/50 p-3 rounded-lg bg-dark-bg/50">
+                            <h3 class="text-xs font-semibold text-warning-400 flex items-center">
+                                <i class="fas fa-map-pin mr-2"></i> Paradas Opcionais
+                            </h3>
+                            <div>
+                                <label for="parada1" class="input-label text-xs">Parada 1</label>
+                                <input type="text" id="parada1" placeholder="Local da primeira parada"
+                                    class="input-field text-sm">
+                            </div>
+                            <div>
+                                <label for="parada2" class="input-label text-xs">Parada 2</label>
+                                <input type="text" id="parada2" placeholder="Local da segunda parada"
+                                    class="input-field text-sm">
+                            </div>
+                        </div>
+
+                        <div class="flex items-center pt-2">
+                            <input id="idaEVolta" type="checkbox"
+                                class="h-4 w-4 text-accent-green border-gray-600 rounded focus:ring-accent-green">
+                            <label for="idaEVolta" class="ml-2 block text-sm font-medium text-gray-200">
+                                Incluir Ida e Volta
+                            </label>
+                        </div>
+
+                        <button id="calcularDistanciaBtn" class="w-full btn-success">
+                            <i class="fas fa-map-marked-alt mr-2"></i> Calcular Rota
+                        </button>
+                    </div>
+
+                    <div id="routeOptionsContainer" class="space-y-2 pt-4 mt-4 border-t border-gray-700 hidden">
+                        <h3 class="text-sm font-semibold text-gray-200 flex items-center">
+                            <i class="fas fa-road mr-2"></i> Rotas Alternativas (Clique para selecionar)
+                        </h3>
+                        <div id="routeOptionsList" class="space-y-2">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-section border border-gray-600 glass-card">
+                    <h3 class="section-title text-gray-200">
+                        <i class="fas fa-info-circle mr-2"></i> Informações e Custo
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center p-3 bg-gray-700 rounded-lg">
+                            <span class="text-sm font-medium text-gray-300">Distância Calculada:</span>
+                            <span id="distanciaDisplay" class="text-sm font-semibold text-white">-- km</span>
+                        </div>
+                        <div>
+                            <label for="precoGasolina" class="input-label">Preço do Combustível (R$/L)</label>
+                            <input type="number" id="precoGasolina" value="6.09" step="0.01" class="input-field">
+                        </div>
+                        <!-- NOVO: Alerta de Pedágio -->
+                        <div
+                            class="p-3 bg-red-900/50 border border-red-700 rounded-lg text-sm text-red-300 flex items-start space-x-2">
+                            <i class="fas fa-exclamation-triangle mt-0.5 flex-shrink-0"></i>
+                            <p><strong>Atenção:</strong> Este cálculo <strong>NÃO</strong> inclui possíveis custos com
+                                pedágios. Use o valor apenas como estimativa de combustível.</p>
+                        </div>
+                        <!-- NOVO: Último Custo Salvo -->
+                        <div class="flex justify-between items-center p-3 bg-gray-700 rounded-lg"
+                            id="ultimoCustoContainer">
+                            <span class="text-sm font-medium text-gray-300">Último Custo Calculado:</span>
+                            <span id="ultimoCustoDisplay" class="text-sm font-semibold text-white">--</span>
+                        </div>
+                        <div>
+                        </div>
+                        <button id="calcularBtn" class="w-full btn-warning">
+                            <i class="fas fa-calculator mr-2"></i> Calcular Custo
+                        </button>
+                    </div>
+                </div>
+
+                <!-- A div #resultado foi removida daqui e será usada no modal -->
+            </div>
+        </div>
+
+        <div class="flex-1 relative">
+            <div id="map" class="w-full h-full bg-gray-800 flex items-center justify-center">
+                <div class="text-center text-gray-500">
+                    <i class="fas fa-map text-6xl mb-4 opacity-50"></i>
+                    <p class="text-xl font-medium">Mapa será carregado aqui</p>
+                    <p class="text-sm">Abra o menu para planejar a rota</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Edição (Mantido) -->
+    <div id="editModal" class="fixed inset-0 bg-black bg-opacity-70 hidden items-center justify-center p-4 z-50">
+        <div
+            class="bg-dark-card p-6 rounded-xl shadow-2xl w-full max-w-md transform transition-all border border-gray-700 glass-card">
+            <h3 class="text-xl font-bold mb-4 flex items-center text-accent-blue">
+                <i class="fas fa-edit text-accent-blue mr-2"></i>
+                Editar Veículo
+            </h3>
+            <div class="space-y-4">
+                <div>
+                    <label for="editModelo" class="block text-sm font-medium text-gray-200 mb-1">Modelo</label>
+                    <input type="text" id="editModelo"
+                        class="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent transition-all bg-gray-700 text-white">
+                </div>
+                <div>
+                    <label for="editEficienciaGasolina" class="block text-sm font-medium text-gray-200 mb-1">Eficiência
+                        Gasolina (km/l)</label>
+                    <input type="number" id="editEficienciaGasolina" step="0.1"
+                        class="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent transition-all bg-gray-700 text-white">
+                </div>
+                <div>
+                    <label for="editEficienciaEtanol" class="block text-sm font-medium text-gray-200 mb-1">Eficiência
+                        Etanol (km/l)</label>
+                    <input type="number" id="editEficienciaEtanol" step="0.1"
+                        class="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent transition-all bg-gray-700 text-white">
+                </div>
+                <div>
+                    <label for="editEficienciaGnv" class="block text-sm font-medium text-gray-200 mb-1">Eficiência GNV
+                        (km/m³)</label>
+                    <input type="number" id="editEficienciaGnv" step="0.1"
+                        class="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent transition-all bg-gray-700 text-white">
+                </div>
+                <!-- NOVO: Campo para Diesel na Edição -->
+                <div>
+                    <label for="editEficienciaDiesel" class="block text-sm font-medium text-gray-200 mb-1">Eficiência
+                        Diesel (km/l)</label>
+                    <input type="number" id="editEficienciaDiesel" step="0.1"
+                        class="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent transition-all bg-gray-700 text-white">
+                </div>
+
+            </div>
+            <div class="flex justify-end space-x-3 pt-4">
+                <button id="cancelEditBtn"
+                    class="px-4 py-2 text-gray-300 bg-gray-600 hover:bg-gray-500 rounded-lg transition-colors">
+                    Cancelar
+                </button>
+                <button id="saveEditBtn"
+                    class="px-4 py-2 bg-accent-blue hover:bg-blue-500 text-white rounded-lg transition-colors">
+                    Salvar
+                </button>
+            </div>
+        </div>
+    </div>
+    <div id="loginPromptModal" class="fixed inset-0 bg-black bg-opacity-70 hidden items-center justify-center p-4 z-50">
+        <div
+            class="bg-dark-card p-6 rounded-xl shadow-2xl w-full max-w-sm transform transition-all border border-gray-700 glass-card relative">
+
+            <button id="closeLoginModalBtn"
+                class="absolute top-3 right-3 text-gray-400 hover:text-white transition-colors">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+
+            <h3 class="text-xl font-bold mb-4 text-center text-accent-blue">
+                <i class="fas fa-lock mr-2"></i>
+                Login Necessário
+            </h3>
+
+            <p class="text-center text-gray-300 mb-6">
+                Por favor, faça login com o Google para acessar esta funcionalidade.
+            </p>
+
+            <button id="googleLoginPromptBtn"
+                class="w-full bg-white text-gray-800 font-medium py-3 px-4 rounded-lg flex items-center justify-center shadow-lg hover:bg-gray-200 transition-colors">
+                <i class="fab fa-google text-xl mr-3"></i>
+                Entrar com Google
+            </button>
+        </div>
+    </div>
+    <!-- NOVO: Modal de Resultado de Cálculo (Mobile Fix) -->
+    <div id="resultModal" class="fixed inset-0 bg-black bg-opacity-70 hidden items-center justify-center p-4 z-50">
+        <div
+            class="bg-dark-card p-6 rounded-xl shadow-2xl w-full max-w-md transform transition-all border border-gray-700 glass-card">
+            <div class="flex justify-between items-start mb-4">
+                <h3 class="text-xl font-bold flex items-center text-accent-green">
+                    <i class="fas fa-calculator mr-2"></i>
+                    Custo da Viagem
+                </h3>
+                <button id="closeResultModalBtn" class="text-gray-400 hover:text-white transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div id="resultado" class="bg-accent-blue text-white p-4 rounded-xl shadow-lg animate-fade-in-up">
+                <div class="text-center">
+                    <i class="fas fa-money-bill-wave text-2xl mb-2"></i>
+                    <p class="text-sm opacity-90">Custo estimado da viagem</p>
+                    <p id="resultadoValor" class="text-2xl font-bold"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden hidden"></div>
+
+    <script type="module" src="script.js"></script>
+
+    <script
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCVK6ApQ4_PjedcFUL_wRIMLJNLfPC1KjY&libraries=places&loading=async&callback=initMap">
+        </script>
+
+    <script type="module" src="https://unpkg.com/@googlemaps/extended-component-library@0.6"></script>
+
+</body>
+
+</html>
