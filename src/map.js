@@ -221,3 +221,31 @@ export function getCurrentRoutesResult() {
 export function getDirectionsRenderer() {
     return directionsRenderer;
 }
+
+// Função para capturar a tela do mapa
+export async function captureMap() {
+    const mapElement = document.getElementById("map");
+    if (!mapElement) {
+        showMessage("Elemento do mapa não encontrado.", "error");
+        return null;
+    }
+
+    // O html2canvas precisa de um pequeno delay para garantir que o mapa esteja totalmente renderizado
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    try {
+        const canvas = await html2canvas(mapElement, {
+            useCORS: true,
+            allowTaint: true,
+            logging: false,
+            // Ajuste para garantir que apenas a área visível do mapa seja capturada
+            width: mapElement.offsetWidth,
+            height: mapElement.offsetHeight
+        });
+        return canvas.toDataURL("image/jpeg", 0.8); // Retorna a imagem em base64
+    } catch (error) {
+        console.error("Erro ao capturar o mapa:", error);
+        showMessage("Erro ao capturar o mapa para o relatório.", "error");
+        return null;
+    }
+}
