@@ -11,41 +11,6 @@ Uma aplicação web moderna para calcular custos de viagem com integração ao G
 - **Autocomplete**: Sugestões automáticas para origem e destino
 - **Persistência de Dados**: Dados salvos no Firebase Firestore
 
-## 🚀 Como Usar
-
-### Pré-requisitos
-
-1. **Chave da API do Google Maps**:
-   - Acesse o [Google Cloud Console](https://console.cloud.google.com/)
-   - Ative as APIs: Maps JavaScript API, Directions API, Places API
-   - Configure as restrições de referenciadores HTTP
-
-2. **Projeto Firebase**:
-   - Crie um projeto no [Firebase Console](https://console.firebase.google.com/)
-   - Configure o Firestore Database
-   - Obtenha as credenciais do projeto
-
-### Configuração
-
-1. **Clone ou baixe o projeto**
-2. **Configure as chaves da API**:
-   - No arquivo `index.html`, substitua `AIzaSyCVK6ApQ4_PjedcFUL_wRIMLJNLfPC1KjY` pela sua chave do Google Maps
-   - No arquivo `script.js`, atualize o objeto `firebaseConfig` com suas credenciais
-
-3. **Execute o projeto**:
-   ```bash
-   # Usando Live Server (VS Code)
-   # Ou usando http-server
-   npx http-server . -p 5500 -o
-   ```
-
-### Restrições da API do Google Maps
-
-Para desenvolvimento local, configure as restrições de referenciadores HTTP:
-- `http://127.0.0.1:5500/*`
-- `http://localhost:5500/*`
-
-Para produção, substitua pelos domínios do seu site.
 
 ## 📱 Como Usar a Aplicação
 
@@ -86,31 +51,6 @@ calculadora-combustivel/
 ```
 
 ## 🔧 Personalização
-
-### Cores e Tema
-Edite as variáveis CSS no arquivo `style.css` ou ajuste a configuração do Tailwind no `index.html`.
-
-### Funcionalidades Adicionais
-- Adicione novos tipos de combustível
-- Implemente histórico de viagens
-- Integre com APIs de preços de combustível
-- Adicione notificações push
-
-## 🐛 Solução de Problemas
-
-### Mapa não carrega
-- Verifique se a chave da API está correta
-- Confirme se as APIs necessárias estão ativadas
-- Verifique as restrições de referenciadores HTTP
-
-### Erro no Firebase
-- Confirme se as credenciais estão corretas
-- Verifique se o Firestore está configurado
-- Confirme se as regras de segurança permitem leitura/escrita
-
-### Autocomplete não funciona
-- Verifique se a Places API está ativada
-- Confirme se a biblioteca `places` está carregada
 
 ## 📄 Licença
 
