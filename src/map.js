@@ -283,6 +283,12 @@ export async function calcularDistancia() {
 
         runRouteRace(map, result.routes, markWinnerCard);
 
+        // No mobile, recolhe o painel automaticamente para revelar o mapa com a rota calculada
+        if (window.innerWidth < 1024) {
+            document.getElementById("sidebar")?.classList.add("panel-closed");
+            document.getElementById("sidebarOverlay")?.classList.add("hidden");
+        }
+
     } else { showMessage("Erro ao calcular rota. Verifique os endereços informados.", "error"); console.error("Erro na API de Direções:", status); }
 }
 
