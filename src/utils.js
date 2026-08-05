@@ -2,11 +2,17 @@
 
 // ===== Funções de Mensagens (Toast) =====
 export function showMessage(msg, type = "success") {
+    const existing = document.querySelectorAll(".message-box").length;
     const box = document.createElement("div");
     box.className = `message-box ${type}`;
+    box.style.setProperty("--toast-offset", `${existing * 4.25}rem`);
     box.innerHTML = `<div class="flex items-center"><i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} mr-2"></i><span>${msg}</span></div>`;
     document.body.appendChild(box);
-    setTimeout(() => { box.style.transform = 'translateX(100%)'; setTimeout(() => box.remove(), 300); }, 3000);
+    setTimeout(() => {
+        box.style.opacity = '0';
+        box.style.transform = 'translateX(120%)';
+        setTimeout(() => box.remove(), 300);
+    }, 3500);
 }
 
 // ===== Funções de Persistência de Custo (localStorage) =====
@@ -43,13 +49,13 @@ export function setupUIListeners() {
     document.getElementById("toggleSidebar").addEventListener("click", () => {
         const sidebar = document.getElementById("sidebar");
         const overlay = document.getElementById("sidebarOverlay");
-        sidebar.classList.toggle("-translate-x-full");
+        sidebar.classList.toggle("panel-closed");
         overlay.classList.toggle("hidden");
     });
     document.getElementById("sidebarOverlay").addEventListener("click", () => {
         const sidebar = document.getElementById("sidebar");
         const overlay = document.getElementById("sidebarOverlay");
-        sidebar.classList.add("-translate-x-full");
+        sidebar.classList.add("panel-closed");
         overlay.classList.add("hidden");
     });
 }
@@ -71,7 +77,7 @@ export function highlightLoginButton(message) {
     const sidebar = document.getElementById("sidebar");
     const overlay = document.getElementById("sidebarOverlay");
     if (window.innerWidth <= 1024) {
-        sidebar.classList.add("-translate-x-full");
+        sidebar.classList.add("panel-closed");
         overlay.classList.add("hidden");
     }
 

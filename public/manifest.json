@@ -1,0 +1,25 @@
+{
+    "name": "Quanto Vou Gastar - Calculadora de Combustível",
+    "short_name": "Quanto Vou Gastar",
+    "description": "Planeje suas viagens e calcule o custo de combustível e pedágio.",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "orientation": "portrait-primary",
+    "background_color": "#0f172a",
+    "theme_color": "#0f172a",
+    "icons": [
+        {
+            "src": "/Imgs/logo7.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/Imgs/logo7.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        }
+    ]
+}

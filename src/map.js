@@ -1,5 +1,8 @@
 // src/map.js
 import { showMessage, updateDistanceDisplay, formatDuration } from "./utils.js";
+import html2canvas from "html2canvas";
+import { fetchTollEstimates } from "./tollService.js";
+import { runRouteRace, clearRace } from "./routeRace.js";
 
 // Variáveis globais do mapa
 export let map, directionsService, directionsRenderer;
@@ -8,6 +11,8 @@ let autocompleteOrigin, autocompleteDestination, autocompleteParada1, autocomple
 let distanciaIdaPura = 0;
 let currentRoutesResult = null; // Armazena o resultado completo da rota
 let currentTollCost = 0; // Custo do pedágio da rota selecionada
+let tollEstimates = null; // Array de estimativas de pedágio (Routes API), uma por rota
+const lastPlaces = {}; // Último place (com geometry) selecionado por campo: origem, destino, parada1, parada2
 
 // ===== Inicializar Google Maps =====
 export function initMap() {
@@ -15,8 +20,11 @@ export function initMap() {
         zoom: 5,
         center: { lat: -14.2350, lng: -51.9253 },
         mapTypeControl: true,
+        mapTypeControlOptions: { position: google.maps.ControlPosition.TOP_RIGHT },
         streetViewControl: false,
         fullscreenControl: true,
+        fullscreenControlOptions: { position: google.maps.ControlPosition.RIGHT_BOTTOM },
+        zoomControlOptions: { position: google.maps.ControlPosition.RIGHT_BOTTOM },
         styles: [{ featureType: "poi", elementType: "labels", stylers: [{ visibility: "off" }] }]
     });
 
@@ -42,10 +50,10 @@ function setupAutocomplete() {
     autocompleteParada1 = new google.maps.places.Autocomplete(parada1Input, { componentRestrictions: { country: "br" }, fields: ["place_id", "geometry", "name", "formatted_address"] });
     autocompleteParada2 = new google.maps.places.Autocomplete(parada2Input, { componentRestrictions: { country: "br" }, fields: ["place_id", "geometry", "name", "formatted_address"] });
 
-    autocompleteOrigin.addListener("place_changed", () => { const place = autocompleteOrigin.getPlace(); if (place.geometry) updateOriginMarker(place); });
-    autocompleteDestination.addListener("place_changed", () => { const place = autocompleteDestination.getPlace(); if (place.geometry) updateDestinationMarker(place); });
-    autocompleteParada1.addListener("place_changed", () => { const place = autocompleteParada1.getPlace(); if (place.geometry) updateParadaMarker(place, 1); });
-    autocompleteParada2.addListener("place_changed", () => { const place = autocompleteParada2.getPlace(); if (place.geometry) updateParadaMarker(place, 2); });
+    autocompleteOrigin.addListener("place_changed", () => { const place = autocompleteOrigin.getPlace(); if (place.geometry) { lastPlaces.origem = place; updateOriginMarker(place); } });
+    autocompleteDestination.addListener("place_changed", () => { const place = autocompleteDestination.getPlace(); if (place.geometry) { lastPlaces.destino = place; updateDestinationMarker(place); } });
+    autocompleteParada1.addListener("place_changed", () => { const place = autocompleteParada1.getPlace(); if (place.geometry) { lastPlaces.parada1 = place; updateParadaMarker(place, 1); } });
+    autocompleteParada2.addListener("place_changed", () => { const place = autocompleteParada2.getPlace(); if (place.geometry) { lastPlaces.parada2 = place; updateParadaMarker(place, 2); } });
 }
 
 function updateOriginMarker(place) {
@@ -76,6 +84,19 @@ function fitMapToMarkers() {
     } catch (e) { /* ignore */ }
 }
 
+// ===== Corrida das rotas (efeito visual) =====
+function markWinnerCard(index) {
+    const card = document.querySelector(`.route-option-card[data-route-index="${index}"]`);
+    if (!card) return;
+    const title = card.querySelector('.route-title');
+    if (title && !title.querySelector('.race-winner-badge')) {
+        const badge = document.createElement('span');
+        badge.className = 'race-winner-badge';
+        badge.innerHTML = '<i class="fas fa-trophy mr-1"></i>Mais rápida';
+        title.querySelector('span').after(badge);
+    }
+}
+
 // ===== Funções de Rota =====
 function displayRouteOptions(routes) {
     const container = document.getElementById('routeOptionsContainer');
@@ -90,13 +111,19 @@ function displayRouteOptions(routes) {
             const distanceKm = (totalDistanceMeters / 1000).toFixed(2);
             const durationText = formatDuration(totalDurationSeconds);
 
-            const hasTolls = route.warnings.some(w => w.includes('tolls'));
-            const tollCost = hasTolls ? -1 : 0;
+            let tollHtml = '';
+            const tollEstimate = tollEstimates ? tollEstimates[index] : undefined;
+            if (tollEstimate) {
+                tollHtml = `<div class="toll-info-card"><i class="fas fa-road mr-1"></i> Pedágio estimado: <span class="toll-value">R$ ${tollEstimate.value.toFixed(2)}</span></div>`;
+            } else if (tollEstimate === undefined) {
+                // Estimativa via API indisponível: cai no aviso genérico baseado nos avisos do Directions
+                const hasTolls = route.warnings.some(w => w.toLowerCase().includes('tolls') || w.toLowerCase().includes('pedágio'));
+                if (hasTolls) tollHtml = '<div class="toll-info-card"><i class="fas fa-road mr-1"></i> Pedágio: <span class="toll-value">Presente (Custo Desconhecido)</span></div>';
+            }
 
             const card = document.createElement('div');
             card.className = `route-option-card ${index === 0 ? 'selected' : ''}`;
             card.dataset.routeIndex = index;
-            card.dataset.tollCost = tollCost;
             card.innerHTML = `
                 <div class="route-title flex justify-between items-center">
                     <span>${route.summary}</span>
@@ -105,13 +132,45 @@ function displayRouteOptions(routes) {
                 <div class="route-details">
                     Distância: ${distanceKm} km | Tempo: ${durationText}
                 </div>
-                ${tollCost === -1 ? '<div class="toll-info-card"><i class="fas fa-road mr-1"></i> Pedágio: <span class="toll-value">Presente (Custo Desconhecido)</span></div>' : ''}
+                ${tollHtml}
             `;
             card.addEventListener('click', () => selectRoute(index));
             list.appendChild(card);
         });
     } else {
         container.classList.add('hidden');
+    }
+}
+
+function updateTollBanner(tollEstimate, tollDataAvailable) {
+    const banner = document.getElementById('tollStatusBanner');
+    const mapBadge = document.getElementById('tollMapBadge');
+    const mapBadgeText = document.getElementById('tollMapBadgeText');
+
+    if (!tollDataAvailable) {
+        if (banner) { banner.classList.add('hidden'); banner.innerHTML = ''; }
+        if (mapBadge) mapBadge.classList.add('hidden');
+        return;
+    }
+
+    if (banner) {
+        banner.classList.remove('hidden');
+        if (tollEstimate) {
+            banner.className = 'p-3 rounded-lg text-sm flex items-start space-x-2 bg-emerald-900/40 border border-emerald-700/60 text-emerald-200';
+            banner.innerHTML = `<i class="fas fa-road mt-0.5 flex-shrink-0"></i><p><strong>Pedágio detectado nesta rota:</strong> R$ ${tollEstimate.value.toFixed(2)} (já preenchido abaixo).</p>`;
+        } else {
+            banner.className = 'p-3 rounded-lg text-sm flex items-start space-x-2 bg-slate-700/50 border border-slate-600 text-slate-300';
+            banner.innerHTML = `<i class="fas fa-check-circle mt-0.5 flex-shrink-0"></i><p>Nenhum pedágio detectado nesta rota.</p>`;
+        }
+    }
+
+    if (mapBadge && mapBadgeText) {
+        if (tollEstimate) {
+            mapBadgeText.textContent = `Pedágio: R$ ${tollEstimate.value.toFixed(2)}`;
+            mapBadge.classList.remove('hidden');
+        } else {
+            mapBadge.classList.add('hidden');
+        }
     }
 }
 
@@ -124,8 +183,14 @@ export function selectRoute(index) {
     const totalDistanceMeters = selectedRoute.legs.reduce((sum, leg) => sum + leg.distance.value, 0);
     distanciaIdaPura = totalDistanceMeters / 1000;
 
-    const selectedTollCost = parseFloat(document.querySelector(`.route-option-card[data-route-index="${index}"]`).dataset.tollCost);
-    currentTollCost = selectedTollCost === -1 ? 0 : selectedTollCost;
+    const tollEstimate = tollEstimates ? tollEstimates[index] : null;
+    currentTollCost = tollEstimate ? tollEstimate.value : 0;
+    updateTollBanner(tollEstimate, !!tollEstimates);
+
+    if (tollEstimate) {
+        const custoPedagioInput = document.getElementById("custoPedagio");
+        if (custoPedagioInput) custoPedagioInput.value = tollEstimate.value.toFixed(2);
+    }
 
     const idaEVoltaChecked = document.getElementById("idaEVolta")?.checked || false;
     updateDistanceDisplay(distanciaIdaPura, idaEVoltaChecked);
@@ -143,10 +208,16 @@ export function selectRoute(index) {
         }
     });
 
-    showMessage(`Rota ${index + 1} selecionada. Distância atualizada.`, "info");
+    showMessage(`Rota ${index + 1} selecionada.${tollEstimate ? ` Pedágio estimado: R$ ${tollEstimate.value.toFixed(2)} (preenchido automaticamente).` : ''}`, "info");
 }
 
-export function calcularDistancia() {
+function routeDirections(request) {
+    return new Promise(resolve => {
+        directionsService.route(request, (result, status) => resolve({ result, status }));
+    });
+}
+
+export async function calcularDistancia() {
     const origem = document.getElementById("origem").value.trim();
     const destino = document.getElementById("destino").value.trim();
     const parada1 = document.getElementById("parada1").value.trim();
@@ -156,8 +227,12 @@ export function calcularDistancia() {
 
     document.getElementById('routeOptionsContainer').classList.add('hidden');
     document.getElementById('routeOptionsList').innerHTML = '';
+    document.getElementById('tollStatusBanner').classList.add('hidden');
+    document.getElementById('tollMapBadge').classList.add('hidden');
     currentRoutesResult = null;
     currentTollCost = 0;
+    tollEstimates = null;
+    clearRace();
 
     const waypoints = [];
     if (parada1) waypoints.push({ location: parada1, stopover: true });
@@ -175,35 +250,49 @@ export function calcularDistancia() {
         provideRouteAlternatives: true
     };
 
-    directionsService.route(request, (result, status) => {
-        btn.classList.remove("loading"); btn.disabled = false;
-        if (status === "OK") {
-            currentRoutesResult = result;
+    const paradas = [parada1, parada2].filter(Boolean);
 
-            directionsRenderer.setDirections(result);
-            directionsRenderer.setRouteIndex(0);
+    const [{ result, status }, tollResult] = await Promise.all([
+        routeDirections(request),
+        fetchTollEstimates({ origem, destino, paradas })
+    ]);
 
-            let totalDistanceMeters = 0;
-            result.routes[0].legs.forEach(leg => totalDistanceMeters += leg.distance.value);
-            const distanceKm = totalDistanceMeters / 1000;
-            distanciaIdaPura = distanceKm;
-            const idaEVoltaChecked = document.getElementById("idaEVolta")?.checked || false;
-            updateDistanceDisplay(distanciaIdaPura, idaEVoltaChecked);
+    btn.classList.remove("loading"); btn.disabled = false;
 
-            if (originMarker) originMarker.setMap(null); if (destinationMarker) destinationMarker.setMap(null); if (parada1Marker) parada1Marker.setMap(null); if (parada2Marker) parada2Marker.setMap(null);
+    if (status === "OK") {
+        currentRoutesResult = result;
+        tollEstimates = tollResult;
 
-            showMessage(`Rota calculada: ${distanceKm.toFixed(2)} km (incluindo paradas). ${result.routes.length > 1 ? 'Veja as opções alternativas abaixo.' : ''}`);
+        directionsRenderer.setDirections(result);
+        directionsRenderer.setRouteIndex(0);
 
-            displayRouteOptions(result.routes);
+        let totalDistanceMeters = 0;
+        result.routes[0].legs.forEach(leg => totalDistanceMeters += leg.distance.value);
+        const distanceKm = totalDistanceMeters / 1000;
+        distanciaIdaPura = distanceKm;
+        const idaEVoltaChecked = document.getElementById("idaEVolta")?.checked || false;
+        updateDistanceDisplay(distanciaIdaPura, idaEVoltaChecked);
 
-            selectRoute(0);
+        if (originMarker) originMarker.setMap(null); if (destinationMarker) destinationMarker.setMap(null); if (parada1Marker) parada1Marker.setMap(null); if (parada2Marker) parada2Marker.setMap(null);
 
-        } else { showMessage("Erro ao calcular rota. Verifique os endereços informados.", "error"); console.error("Erro na API de Direções:", status); }
-    });
+        showMessage(`Rota calculada: ${distanceKm.toFixed(2)} km (incluindo paradas). ${result.routes.length > 1 ? 'Veja as opções alternativas abaixo.' : ''}`);
+
+        displayRouteOptions(result.routes);
+
+        selectRoute(0);
+
+        runRouteRace(map, result.routes, markWinnerCard);
+
+    } else { showMessage("Erro ao calcular rota. Verifique os endereços informados.", "error"); console.error("Erro na API de Direções:", status); }
 }
 
 export function initializeMapListeners() {
     document.getElementById("calcularDistanciaBtn").addEventListener("click", calcularDistancia);
+}
+
+// Remove as trilhas/marcadores da corrida do mapa, deixando só a rota escolhida visível (usado antes de capturar o mapa para relatórios)
+export function clearRouteRaceVisuals() {
+    clearRace();
 }
 
 export function getDistanciaIdaPura() {
@@ -220,6 +309,11 @@ export function getCurrentRoutesResult() {
 
 export function getDirectionsRenderer() {
     return directionsRenderer;
+}
+
+// Retorna o último place (com geometry) selecionado via autocomplete para um campo: origem, destino, parada1, parada2
+export function getLastPlace(fieldKey) {
+    return lastPlaces[fieldKey] || null;
 }
 
 // Função para capturar a tela do mapa
@@ -248,4 +342,62 @@ export async function captureMap() {
         showMessage("Erro ao capturar o mapa para o relatório.", "error");
         return null;
     }
+}
+
+// =============================
+//  Função Geolocalização
+// =============================
+export function setupGeoButton() {
+    const btn = document.getElementById("geolocalizacaoBtn");
+
+    if (!btn) {
+        console.warn("Botão de geolocalização não encontrado.");
+        return;
+    }
+
+    btn.addEventListener("click", () => {
+        if (!navigator.geolocation) {
+            alert("Seu navegador não suporta geolocalização.");
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                const lat = pos.coords.latitude;
+                const lng = pos.coords.longitude;
+                const latlng = { lat, lng };
+
+                const geocoder = new google.maps.Geocoder();
+                geocoder.geocode({ location: latlng }, (results, status) => {
+                    if (status === "OK" && results[0]) {
+                        // Preenche o campo de origem
+                        const origemInput = document.getElementById("origem");
+                        if (origemInput) origemInput.value = results[0].formatted_address;
+                        lastPlaces.origem = { formatted_address: results[0].formatted_address, geometry: { location: { lat: () => lat, lng: () => lng } } };
+
+                        // Centraliza o mapa usando a variável local 'map' deste módulo
+                        if (map) {
+                            map.setCenter(latlng);
+                            map.setZoom(15);
+
+                            new google.maps.Marker({
+                                position: latlng,
+                                map: map,
+                                title: "Sua localização atual",
+                            });
+                        }
+
+                        console.log("Localização detectada:", results[0].formatted_address);
+                    } else {
+                        alert("Não foi possível obter seu endereço.");
+                    }
+                });
+            },
+
+            (err) => {
+                console.error("Erro ao obter localização:", err);
+                alert("Não foi possível acessar sua localização.");
+            }
+        );
+    });
 }

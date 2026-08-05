@@ -1,9 +1,7 @@
 // src/vehicle.js
-import { db, getCurrentUserId, getShowInactive, setShowInactive } from "./auth.js";
+import { getCurrentUserId, getShowInactive, setShowInactive } from "./auth.js";
 import { showMessage, highlightLoginButton } from "./utils.js";
-import {
-    collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where
-} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+import { vehicleService } from "./services/vehicleService.js";
 
 // Variável para o veículo selecionado
 export let veiculoSelecionadoData = null;
@@ -30,10 +28,7 @@ export async function loadVeiculos() {
     }
 
     try {
-        const q = query(collection(db, "veiculos"), where("userId", "==", currentUserId));
-        const snapshot = await getDocs(q);
-        const veiculos = [];
-        snapshot.forEach(d => veiculos.push({ id: d.id, ...d.data() }));
+        const veiculos = await vehicleService.getAll(currentUserId);
 
         if (veiculos.length === 0) {
             list.innerHTML = `<div class="p-4 text-center text-gray-500">Nenhum veículo cadastrado.</div>`;
@@ -59,13 +54,14 @@ export async function loadVeiculos() {
             select.appendChild(option);
 
             // Adiciona à Lista
+            const placa = v.placa || '';
             const card = document.createElement("div");
             card.className = `vehicle-card ${v.ativo ? '' : 'inactive'}`;
             card.innerHTML = `
                 <div class="flex justify-between items-center">
-                    <h3 class="font-semibold text-lg">${v.modelo}</h3>
+                    <h3 class="font-semibold text-lg">${v.modelo}${placa ? ` <span class="text-xs font-normal text-gray-400 border border-gray-600 rounded px-1.5 py-0.5 ml-1 align-middle">${placa}</span>` : ''}</h3>
                     <div class="space-x-2 flex items-center">
-                        <button class="btn-edit text-blue-400 hover:text-blue-300" data-id="${v.id}" data-modelo="${v.modelo}" data-gas="${ef_gas}" data-eta="${ef_eta}" data-gnv="${ef_gnv}" data-die="${ef_die}">
+                        <button class="btn-edit text-blue-400 hover:text-blue-300" data-id="${v.id}" data-modelo="${v.modelo}" data-placa="${placa}" data-gas="${ef_gas}" data-eta="${ef_eta}" data-gnv="${ef_gnv}" data-die="${ef_die}">
                             <i class="fas fa-edit"></i>
                         </button>
                         <button class="btn-toggle-active text-yellow-400 hover:text-yellow-300" data-id="${v.id}" data-ativo="${v.ativo}">
@@ -105,6 +101,7 @@ export async function loadVeiculos() {
 
 async function handleAddVeiculo() {
     const modelo = document.getElementById("novoModelo").value.trim();
+    const placa = document.getElementById("novaPlaca").value.trim().toUpperCase();
     const ef_gas = parseFloat(document.getElementById("novaEficienciaGasolina").value) || 0;
     const ef_eta = parseFloat(document.getElementById("novaEficienciaEtanol").value) || 0;
     const ef_gnv = parseFloat(document.getElementById("novaEficienciaGnv").value) || 0;
@@ -116,24 +113,25 @@ async function handleAddVeiculo() {
     if (ef_gas <= 0 && ef_eta <= 0 && ef_gnv <= 0 && ef_die <= 0) { showMessage("Informe pelo menos uma eficiência de combustível.", "error"); return; }
 
     try {
-        await addDoc(collection(db, "veiculos"), {
-            userId: currentUserId,
+        await vehicleService.create(currentUserId, {
             modelo,
+            placa,
             eficiencias: {
                 gasolina: ef_gas,
                 etanol: ef_eta,
                 gnv: ef_gnv,
                 diesel: ef_die
             },
-            ativo: true,
-            createdAt: new Date()
+            ativo: true
         });
         showMessage("Veículo adicionado com sucesso!", "success");
         document.getElementById("novoModelo").value = "";
+        document.getElementById("novaPlaca").value = "";
         document.getElementById("novaEficienciaGasolina").value = "";
         document.getElementById("novaEficienciaEtanol").value = "";
         document.getElementById("novaEficienciaGnv").value = "";
         document.getElementById("novaEficienciaDiesel").value = "";
+        document.getElementById("addVeiculoForm").classList.add("hidden");
         loadVeiculos();
     } catch (e) {
         console.error("Erro ao adicionar veículo:", e);
@@ -145,6 +143,7 @@ function handleEditClick(e) {
     const btn = e.currentTarget;
     window.editId = btn.dataset.id;
     document.getElementById("editModelo").value = btn.dataset.modelo;
+    document.getElementById("editPlaca").value = btn.dataset.placa || "";
     document.getElementById("editEficienciaGasolina").value = btn.dataset.gas;
     document.getElementById("editEficienciaEtanol").value = btn.dataset.eta;
     document.getElementById("editEficienciaGnv").value = btn.dataset.gnv;
@@ -156,6 +155,7 @@ function handleEditClick(e) {
 async function handleSaveEdit() {
     const id = window.editId;
     const modelo = document.getElementById("editModelo").value.trim();
+    const placa = document.getElementById("editPlaca").value.trim().toUpperCase();
     const ef_gas = parseFloat(document.getElementById("editEficienciaGasolina").value) || 0;
     const ef_eta = parseFloat(document.getElementById("editEficienciaEtanol").value) || 0;
     const ef_gnv = parseFloat(document.getElementById("editEficienciaGnv").value) || 0;
@@ -165,9 +165,9 @@ async function handleSaveEdit() {
     if (ef_gas <= 0 && ef_eta <= 0 && ef_gnv <= 0 && ef_die <= 0) { showMessage("Informe pelo menos uma eficiência de combustível.", "error"); return; }
 
     try {
-        const veiculoRef = doc(db, "veiculos", id);
-        await updateDoc(veiculoRef, {
+        await vehicleService.update(id, {
             modelo,
+            placa,
             eficiencias: {
                 gasolina: ef_gas,
                 etanol: ef_eta,
@@ -189,8 +189,7 @@ async function handleToggleActive(e) {
     const id = e.currentTarget.dataset.id;
     const ativo = e.currentTarget.dataset.ativo === 'true';
     try {
-        const veiculoRef = doc(db, "veiculos", id);
-        await updateDoc(veiculoRef, { ativo: !ativo });
+        await vehicleService.update(id, { ativo: !ativo });
         showMessage(`Veículo ${!ativo ? 'ativado' : 'inativado'} com sucesso!`, "info");
         loadVeiculos();
     } catch (e) {
@@ -203,7 +202,7 @@ async function handleDelete(e) {
     const id = e.currentTarget.dataset.id;
     if (!confirm("Tem certeza que deseja excluir este veículo?")) return;
     try {
-        await deleteDoc(doc(db, "veiculos", id));
+        await vehicleService.remove(id);
         showMessage("Veículo excluído com sucesso!", "success");
         loadVeiculos();
     } catch (e) {
@@ -213,6 +212,9 @@ async function handleDelete(e) {
 }
 
 export function initializeVehicleListeners() {
+    document.getElementById("toggleAddVeiculoBtn").addEventListener("click", () => {
+        document.getElementById("addVeiculoForm").classList.toggle("hidden");
+    });
     document.getElementById("addVeiculoBtn").addEventListener("click", handleAddVeiculo);
     document.getElementById("saveEditBtn").addEventListener("click", handleSaveEdit);
     document.getElementById("cancelEditBtn").addEventListener("click", () => {

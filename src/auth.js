@@ -1,11 +1,11 @@
 // src/auth.js
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+import { initializeApp } from "firebase/app";
 import {
     getFirestore
-} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+} from "firebase/firestore";
 import {
     getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+} from "firebase/auth";
 
 import { showMessage } from "./utils.js";
 
@@ -15,16 +15,10 @@ export let currentUserId = null;
 // Variável para o estado de exibição de inativos (será atualizada pelo módulo de veículos)
 export let showInactive = false;
 
+import { config } from "./config.js";
+
 // ===== Configuração Firebase (Use sua chave de Auth) =====
-const firebaseConfig = {
-    apiKey: "AIzaSyCP3YOpgh50JgMNwcm5ITWFuyYgf40eQnU", // Use sua chave real do Firebase Auth aqui
-    authDomain: "quantovougastar.firebaseapp.com",
-    projectId: "quantovougastar",
-    storageBucket: "quantovougastar.appspot.com",
-    messagingSenderId: "591670557539",
-    appId: "1:591670557539:web:b1061bc35df30cbd6b3156",
-    measurementId: "G-XZ3Z2Y0T4E"
-};
+const firebaseConfig = config.firebase;
 
 // ===== Inicializar Firebase =====
 const app = initializeApp(firebaseConfig);
@@ -47,7 +41,6 @@ export async function signOutUser() {
 export function updateUI(user, loadVeiculosCallback) {
     const authBtn = document.getElementById("authBtn");
     const authIcon = document.getElementById("authIcon");
-    const toggleBtn = document.getElementById("toggleSidebar");
 
     if (user) {
         currentUserId = user.uid;
@@ -62,15 +55,10 @@ export function updateUI(user, loadVeiculosCallback) {
         authBtn.title = "Entrar com Google";
     }
 
-    // Gerencia a visibilidade do botão de menu no mobile
-    if (window.innerWidth <= 1024) {
-        toggleBtn.style.display = 'flex';
-        if (!user) {
-            document.getElementById("sidebar").classList.add("-translate-x-full");
-            document.getElementById("sidebarOverlay").classList.add("hidden");
-        }
-    } else {
-        toggleBtn.style.display = 'none';
+    // No mobile, fecha o painel automaticamente se o usuário deslogar
+    if (window.innerWidth <= 1024 && !user) {
+        document.getElementById("sidebar").classList.add("panel-closed");
+        document.getElementById("sidebarOverlay").classList.add("hidden");
     }
 
     // Chama a função de carregar veículos (passada como callback)
