@@ -1,6 +1,5 @@
 // src/map.js
 import { showMessage, updateDistanceDisplay, formatDuration } from "./utils.js";
-import html2canvas from "html2canvas";
 import { fetchTollEstimates } from "./tollService.js";
 import { runRouteRace, clearRace } from "./routeRace.js";
 
@@ -334,6 +333,7 @@ export async function captureMap() {
     await new Promise(resolve => setTimeout(resolve, 500));
 
     try {
+        const { default: html2canvas } = await import("html2canvas");
         const canvas = await html2canvas(mapElement, {
             useCORS: true,
             allowTaint: true,

@@ -248,6 +248,80 @@ body {
     letter-spacing: -0.025em;
 }
 
+/* ===============================
+    Carrinho animado (aba Veículos)
+    =============================== */
+.vehicle-scene {
+    position: relative;
+    height: 72px;
+    border-radius: 1rem;
+    overflow: hidden;
+    background: linear-gradient(180deg, rgba(56, 189, 248, 0.06) 0%, rgba(15, 23, 42, 0.3) 100%);
+}
+
+.vehicle-road {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 16px;
+    height: 3px;
+    background-image: repeating-linear-gradient(90deg, #475569 0 18px, transparent 18px 34px);
+    animation: vehicle-road-scroll 1s linear infinite;
+}
+
+@keyframes vehicle-road-scroll {
+    from {
+        background-position-x: 0;
+    }
+
+    to {
+        background-position-x: -34px;
+    }
+}
+
+.vehicle-car {
+    position: absolute;
+    bottom: 14px;
+    left: -15%;
+    animation: vehicle-drive 4.5s linear infinite;
+    filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.35));
+}
+
+@keyframes vehicle-drive {
+    from {
+        left: -15%;
+    }
+
+    to {
+        left: 105%;
+    }
+}
+
+.vehicle-car .vehicle-wheel {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: vehicle-wheel-spin 0.5s linear infinite;
+}
+
+@keyframes vehicle-wheel-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .vehicle-road,
+    .vehicle-car,
+    .vehicle-car .vehicle-wheel {
+        animation: none;
+    }
+
+    .vehicle-car {
+        left: 40%;
+    }
+}
+
 /* Cards de Veículos */
 .vehicle-card {
     background: rgba(30, 41, 59, 0.4);
@@ -485,10 +559,85 @@ body {
     }
 }
 
-/* Loading Spinner */
-.loading:after {
-    border-top-color: #38bdf8;
-    border-width: 3px;
+/* Loading Spinner - bomba de combustível pulsando */
+.loading {
+    position: relative;
+    color: transparent !important;
+    pointer-events: none;
+}
+
+.loading::after {
+    content: "";
+    /* fa-gas-pump */
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.15rem;
+    color: #38bdf8;
+    animation: fuel-pump-bounce 0.9s ease-in-out infinite;
+}
+
+/* Ícone dos estados vazios (histórico/endereços) */
+.empty-state-icon {
+    display: inline-block;
+    animation: empty-state-sway 2.4s ease-in-out infinite;
+}
+
+@keyframes empty-state-sway {
+
+    0%,
+    100% {
+        transform: rotate(-8deg);
+    }
+
+    50% {
+        transform: rotate(8deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .empty-state-icon {
+        animation: none;
+    }
+}
+
+/* Chuva de moedinhas no resultado do cálculo */
+.coin-burst {
+    position: absolute;
+    top: -8%;
+    font-size: 1.15rem;
+    pointer-events: none;
+    animation: coin-fall 1s cubic-bezier(0.55, 0, 1, 0.45) forwards;
+    z-index: 5;
+}
+
+@keyframes coin-fall {
+    0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(150px) rotate(var(--rot, 20deg));
+        opacity: 0;
+    }
+}
+
+@keyframes fuel-pump-bounce {
+
+    0%,
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.6;
+    }
+
+    50% {
+        transform: translate(-50%, -60%) scale(1.2);
+        opacity: 1;
+    }
 }
 
 /* Notificações */

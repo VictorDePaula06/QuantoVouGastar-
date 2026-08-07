@@ -1,11 +1,9 @@
 // src/calculation.js
-import { showMessage, saveLastCost, highlightLoginButton } from "./utils.js";
+import { showMessage, saveLastCost, highlightLoginButton, spawnCoinBurst } from "./utils.js";
 import { getVeiculoSelecionadoData, setVeiculoSelecionadoData } from "./vehicle.js";
 import { getDistanciaIdaPura, getCurrentTollCost, getCurrentRoutesResult, getDirectionsRenderer, captureMap, clearRouteRaceVisuals } from "./map.js";
 import { db, getCurrentUserId } from "./auth.js";
 import { getDoc, doc } from "firebase/firestore";
-import { jsPDF } from "jspdf";
-import html2canvas from "html2canvas";
 import { tripService } from "./services/tripService.js";
 import { loadTrips } from "./trip.js";
 
@@ -81,15 +79,21 @@ export async function calcularCusto() {
 
         document.getElementById("resultModal").classList.remove("hidden");
         document.getElementById("resultModal").classList.add("flex");
+        spawnCoinBurst(document.getElementById("resultado"));
 
         saveLastCost(custoTotal);
+        clearRouteRaceVisuals();
 
-        // Armazena os dados para o relatório
+        // Armazena os dados para o relatório (o mapa é capturado só na hora de gerar o relatório, sob demanda)
         storeCalculationData({
+            veiculoId,
             veiculo: veiculoSelecionadoData.modelo,
             placa: veiculoSelecionadoData.placa || '',
             combustivel: combustivelNome,
+            combustivelTipo: tipoCombustivel,
             preco: preco,
+            eficiencia: eficiencia,
+            distanciaBase: distanciaBase,
             custoCombustivel: custoCombustivel,
             custoPedagio: custoPedagio, // NOVO
             origem: document.getElementById("origem").value.trim(),
@@ -100,8 +104,7 @@ export async function calcularCusto() {
             unidade,
             idaEVolta: idaEVoltaChecked,
             rota: getCurrentRoutesResult().routes[getDirectionsRenderer().getRouteIndex()].summary,
-            dataHora: new Date().toLocaleString('pt-BR'),
-            mapaBase64: await (async () => { clearRouteRaceVisuals(); return captureMap(); })()
+            dataHora: new Date().toLocaleString('pt-BR')
         });
 
         showMessage("Custo calculado com sucesso!");
@@ -130,9 +133,9 @@ async function handleSaveTrip() {
     const currentUserId = getCurrentUserId();
     if (!currentUserId) { highlightLoginButton("Faça login para salvar esta viagem no histórico."); return; }
 
-    const { veiculo, combustivel, origem, destino, distancia, custoTotal, litros, rota, dataHora } = lastCalculationData;
+    const { veiculoId, veiculo, combustivel, combustivelTipo, origem, destino, distancia, custoTotal, litros, rota, dataHora } = lastCalculationData;
     try {
-        await tripService.create(currentUserId, { veiculo, combustivel, origem, destino, distancia, custoTotal, litros, rota, dataHora });
+        await tripService.create(currentUserId, { veiculoId, veiculo, combustivel, combustivelTipo, origem, destino, distancia, custoTotal, litros, rota, dataHora });
         showMessage("Viagem salva no histórico!", "success");
         loadTrips();
     } catch (e) {
@@ -163,9 +166,15 @@ export async function generateReimbursementReport() {
         return;
     }
 
-    const { veiculo, placa, combustivel, preco, custoCombustivel, custoPedagio, origem, destino, distancia, custoTotal, litros, unidade, idaEVolta, rota, dataHora, mapaBase64 } = lastCalculationData;
+    const { veiculo, placa, combustivel, preco, eficiencia, distanciaBase, custoCombustivel, custoPedagio, origem, destino, distancia, custoTotal, litros, unidade, idaEVolta, rota, dataHora } = lastCalculationData;
+    const unidadeEficiencia = combustivel.toLowerCase() === 'gnv' ? 'km/m³' : 'km/l';
 
-    // const { jsPDF } = window.jspdf; // Removed: imported from npm
+    showMessage("Gerando relatório...", "info");
+    const [{ jsPDF }, mapaBase64] = await Promise.all([
+        import("jspdf"),
+        captureMap()
+    ]);
+
     const doc = new jsPDF();
     let y = 15;
 
@@ -233,6 +242,34 @@ export async function generateReimbursementReport() {
     doc.text(`R$ ${custoTotal.toFixed(2)}`, 195, y, null, null, "right");
     doc.setTextColor(0, 0, 0);
     y += 12;
+
+    // Memória de Cálculo (mostra a fórmula usada, passo a passo)
+    doc.setFontSize(14);
+    doc.text("Memória de Cálculo", 15, y);
+    y += 7;
+    doc.setFontSize(10);
+    doc.setTextColor(71, 85, 105);
+
+    if (idaEVolta && distanciaBase) {
+        doc.text(`Distância (ida): ${distanciaBase.toFixed(2)} km  ×  2 (ida e volta)  =  ${distancia} km`, 15, y);
+        y += 6;
+    } else {
+        doc.text(`Distância percorrida: ${distancia} km`, 15, y);
+        y += 6;
+    }
+
+    if (eficiencia) {
+        doc.text(`Consumo: ${distancia} km  ÷  ${eficiencia} ${unidadeEficiencia} (eficiência do veículo)  =  ${litros.toFixed(2)} ${unidade}`, 15, y);
+        y += 6;
+    }
+
+    doc.text(`Custo do combustível: ${litros.toFixed(2)} ${unidade}  ×  R$ ${preco.toFixed(2)}  =  R$ ${custoCombustivel.toFixed(2)}`, 15, y);
+    y += 6;
+    doc.text(`Custo total: R$ ${custoCombustivel.toFixed(2)} (combustível)  +  R$ ${custoPedagio.toFixed(2)} (pedágio/extras)  =  R$ ${custoTotal.toFixed(2)}`, 15, y);
+    y += 6;
+
+    doc.setTextColor(0, 0, 0);
+    y += 6;
 
     // Mapa (se disponível)
     if (mapaBase64) {

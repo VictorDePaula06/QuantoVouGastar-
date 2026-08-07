@@ -276,6 +276,20 @@
                 <!-- ===== Aba: Veículos ===== -->
                 <div data-tab-panel="veiculos" class="space-y-4 hidden">
 
+                    <div class="vehicle-scene glass-card border border-gray-700">
+                        <div class="vehicle-road"></div>
+                        <div class="vehicle-car">
+                            <svg viewBox="0 0 100 40" width="70" height="28" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M8 28 Q8 18 20 18 L28 10 Q32 6 40 6 L64 6 Q72 6 76 12 L84 18 Q94 18 94 28 L94 30 L8 30 Z" fill="#38bdf8" />
+                                <rect x="8" y="26" width="86" height="6" rx="3" fill="#0ea5e9" />
+                                <path d="M32 10 L40 10 L40 18 L28 18 Z" fill="#e0f2fe" opacity="0.85" />
+                                <path d="M42 10 L62 10 L68 18 L42 18 Z" fill="#e0f2fe" opacity="0.85" />
+                                <circle class="vehicle-wheel" cx="26" cy="30" r="7" fill="#0f172a" stroke="#475569" stroke-width="2" />
+                                <circle class="vehicle-wheel" cx="76" cy="30" r="7" fill="#0f172a" stroke="#475569" stroke-width="2" />
+                            </svg>
+                        </div>
+                    </div>
+
                     <div class="card-section border border-gray-600 glass-card">
                         <div class="flex justify-between items-center mb-2">
                             <h2 class="section-title text-gray-200 mb-0 pb-0 border-0">
@@ -490,7 +504,7 @@
                     <i class="fas fa-times text-xl"></i>
                 </button>
             </div>
-            <div id="resultado" class="bg-sky-600 text-white p-4 rounded-xl shadow-lg animate-fade-in-up">
+            <div id="resultado" class="relative overflow-hidden bg-sky-600 text-white p-4 rounded-xl shadow-lg animate-fade-in-up">
                 <div class="text-center mb-2">
                     <i class="fas fa-money-bill-wave text-2xl mb-1"></i>
                     <p class="text-sm opacity-90">Custo estimado da viagem</p>

@@ -17,7 +17,10 @@ export async function loadTrips() {
         const viagens = await tripService.getAll(currentUserId);
 
         if (viagens.length === 0) {
-            list.innerHTML = `<div class="p-4 text-center text-gray-500">Nenhuma viagem salva ainda. Depois de calcular um custo, clique em "Salvar Viagem".</div>`;
+            list.innerHTML = `<div class="p-6 text-center text-gray-500">
+                <i class="fas fa-route empty-state-icon text-3xl text-gray-600 mb-2"></i>
+                <p>Nenhuma viagem salva ainda. Depois de calcular um custo, clique em "Salvar Viagem".</p>
+            </div>`;
             return;
         }
 
@@ -35,6 +38,9 @@ export async function loadTrips() {
                     </div>
                     <div class="flex items-center space-x-3 flex-shrink-0 ml-2">
                         <span class="text-accent-green font-semibold">R$ ${Number(v.custoTotal).toFixed(2)}</span>
+                        <button class="btn-replay-viagem text-blue-400 hover:text-blue-300" data-id="${v.id}" title="Refazer esta viagem">
+                            <i class="fas fa-redo"></i>
+                        </button>
                         <button class="btn-delete-viagem text-red-400 hover:text-red-300" data-id="${v.id}">
                             <i class="fas fa-trash"></i>
                         </button>
@@ -42,13 +48,37 @@ export async function loadTrips() {
                 </div>
             `;
             list.appendChild(card);
+            card.dataset.tripJson = JSON.stringify(v);
         });
 
         list.querySelectorAll(".btn-delete-viagem").forEach(btn => btn.addEventListener("click", handleDeleteTrip));
+        list.querySelectorAll(".btn-replay-viagem").forEach(btn => btn.addEventListener("click", handleReplayTrip));
     } catch (e) {
         console.error("Erro ao carregar viagens:", e);
         showMessage("Erro ao carregar histórico de viagens.", "error");
     }
+}
+
+function handleReplayTrip(e) {
+    const card = e.currentTarget.closest(".vehicle-card");
+    if (!card) return;
+    const v = JSON.parse(card.dataset.tripJson);
+
+    document.getElementById("origem").value = v.origem || "";
+    document.getElementById("destino").value = v.destino || "";
+
+    if (v.veiculoId) {
+        const veiculoSelect = document.getElementById("veiculo");
+        if (veiculoSelect.querySelector(`option[value="${v.veiculoId}"]`)) {
+            veiculoSelect.value = v.veiculoId;
+        }
+    }
+    if (v.combustivelTipo) {
+        document.getElementById("combustivel").value = v.combustivelTipo;
+    }
+
+    document.querySelector('[data-tab-btn="viagem"]')?.click();
+    showMessage("Dados preenchidos! Clique em \"Calcular Rota\" para continuar.", "info");
 }
 
 async function handleDeleteTrip(e) {

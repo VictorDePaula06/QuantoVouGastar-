@@ -62,7 +62,10 @@ function renderAddressList(enderecos) {
     if (!list) return;
 
     if (enderecos.length === 0) {
-        list.innerHTML = `<div class="p-4 text-center text-gray-500">Nenhum endereço salvo ainda. Use a estrela ao lado dos campos de Origem/Destino/Parada para salvar.</div>`;
+        list.innerHTML = `<div class="p-6 text-center text-gray-500">
+            <i class="fas fa-map-marker-alt empty-state-icon text-3xl text-gray-600 mb-2"></i>
+            <p>Nenhum endereço salvo ainda. Use a estrela ao lado dos campos de Origem/Destino/Parada para salvar.</p>
+        </div>`;
         return;
     }
 

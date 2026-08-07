@@ -1,5 +1,20 @@
 // src/utils.js
 
+// ===== Chuva de moedinhas (efeito no resultado do cálculo) =====
+export function spawnCoinBurst(containerEl, count = 10) {
+    if (!containerEl) return;
+    for (let i = 0; i < count; i++) {
+        const coin = document.createElement("span");
+        coin.className = "coin-burst";
+        coin.textContent = "🪙";
+        coin.style.left = `${8 + Math.random() * 84}%`;
+        coin.style.animationDelay = `${Math.random() * 0.35}s`;
+        coin.style.setProperty("--rot", `${Math.round(Math.random() * 70 - 35)}deg`);
+        containerEl.appendChild(coin);
+        coin.addEventListener("animationend", () => coin.remove());
+    }
+}
+
 // ===== Funções de Mensagens (Toast) =====
 export function showMessage(msg, type = "success") {
     const existing = document.querySelectorAll(".message-box").length;
