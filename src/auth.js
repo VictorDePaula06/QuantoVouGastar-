@@ -55,10 +55,10 @@ export function updateUI(user, loadVeiculosCallback) {
         authBtn.title = "Entrar com Google";
     }
 
-    // No mobile, fecha o painel automaticamente se o usuário deslogar
+    // No mobile, fecha o painel automaticamente se o usuário deslogar (só existe na calculadora)
     if (window.innerWidth <= 1024 && !user) {
-        document.getElementById("sidebar").classList.add("panel-closed");
-        document.getElementById("sidebarOverlay").classList.add("hidden");
+        document.getElementById("sidebar")?.classList.add("panel-closed");
+        document.getElementById("sidebarOverlay")?.classList.add("hidden");
     }
 
     // Chama a função de carregar veículos (passada como callback)
@@ -74,9 +74,9 @@ export function initializeAuth(loadVeiculosCallback) {
         if (user) showMessage(`Bem-vindo, ${user.displayName}!`, "success");
     });
 
-    // Adiciona listener ao botão de login no modal de prompt
-    document.getElementById("googleLoginPromptBtn").addEventListener("click", signIn);
-    document.getElementById("closeLoginModalBtn").addEventListener("click", () => {
+    // Adiciona listener ao botão de login no modal de prompt (só existe em páginas que o incluem)
+    document.getElementById("googleLoginPromptBtn")?.addEventListener("click", signIn);
+    document.getElementById("closeLoginModalBtn")?.addEventListener("click", () => {
         document.getElementById("loginPromptModal").classList.add("hidden");
         document.getElementById("loginPromptModal").classList.remove("flex");
     });

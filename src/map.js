@@ -8,6 +8,7 @@ export let map, directionsService, directionsRenderer;
 let originMarker, destinationMarker, parada1Marker, parada2Marker;
 let autocompleteOrigin, autocompleteDestination, autocompleteParada1, autocompleteParada2;
 let distanciaIdaPura = 0;
+let distanciaVoltaReal = null; // Distância real da volta (rota destino->origem), pode ser diferente da ida
 let currentRoutesResult = null; // Armazena o resultado completo da rota
 let currentTollCost = 0; // Custo do pedágio da rota selecionada
 let tollEstimates = null; // Array de estimativas de pedágio (Routes API), uma por rota
@@ -31,7 +32,7 @@ export function initMap() {
     directionsRenderer = new google.maps.DirectionsRenderer({
         draggable: false,
         panel: null,
-        polylineOptions: { strokeColor: "#60a5fa", strokeWeight: 5, strokeOpacity: 0.9 }
+        polylineOptions: { strokeColor: "#10b981", strokeWeight: 5, strokeOpacity: 0.9 }
     });
     directionsRenderer.setMap(map);
     setupAutocomplete();
@@ -66,7 +67,6 @@ function updateDestinationMarker(place) {
     if (originMarker && destinationMarker) fitMapToMarkers();
 }
 function updateParadaMarker(place, index) {
-    const iconColor = index === 1 ? '#f59e0b' : '#d97706';
     if (index === 1) { if (parada1Marker) parada1Marker.setMap(null); parada1Marker = new google.maps.Marker({ position: place.geometry.location, map, title: "Parada 1: " + place.name }); }
     else { if (parada2Marker) parada2Marker.setMap(null); parada2Marker = new google.maps.Marker({ position: place.geometry.location, map, title: "Parada 2: " + place.name }); }
     if (originMarker && destinationMarker) fitMapToMarkers();
@@ -126,7 +126,7 @@ function displayRouteOptions(routes) {
             card.innerHTML = `
                 <div class="route-title flex justify-between items-center">
                     <span>${route.summary}</span>
-                    ${index === 0 ? '<i class="fas fa-check-circle text-accent-green"></i>' : ''}
+                    ${index === 0 ? '<i class="fas fa-check-circle text-verde-respira"></i>' : ''}
                 </div>
                 <div class="route-details">
                     Distância: ${distanceKm} km | Tempo: ${durationText}
@@ -155,10 +155,10 @@ function updateTollBanner(tollEstimate, tollDataAvailable) {
     if (banner) {
         banner.classList.remove('hidden');
         if (tollEstimate) {
-            banner.className = 'p-3 rounded-lg text-sm flex items-start space-x-2 bg-emerald-900/40 border border-emerald-700/60 text-emerald-200';
+            banner.className = 'p-3 rounded-lg text-sm flex items-start space-x-2 bg-verde-respira/10 border border-verde-respira/30 text-verde-respira';
             banner.innerHTML = `<i class="fas fa-road mt-0.5 flex-shrink-0"></i><p><strong>Pedágio detectado nesta rota:</strong> R$ ${tollEstimate.value.toFixed(2)} (já preenchido abaixo).</p>`;
         } else {
-            banner.className = 'p-3 rounded-lg text-sm flex items-start space-x-2 bg-slate-700/50 border border-slate-600 text-slate-300';
+            banner.className = 'p-3 rounded-lg text-sm flex items-start space-x-2 bg-zinc-700/50 border border-zinc-600 text-zinc-300';
             banner.innerHTML = `<i class="fas fa-check-circle mt-0.5 flex-shrink-0"></i><p>Nenhum pedágio detectado nesta rota.</p>`;
         }
     }
@@ -192,7 +192,7 @@ export function selectRoute(index) {
     }
 
     const idaEVoltaChecked = document.getElementById("idaEVolta")?.checked || false;
-    updateDistanceDisplay(distanciaIdaPura, idaEVoltaChecked);
+    updateDistanceDisplay(distanciaIdaPura, idaEVoltaChecked, distanciaVoltaReal);
 
     document.querySelectorAll('.route-option-card').forEach(card => {
         card.classList.remove('selected');
@@ -202,7 +202,7 @@ export function selectRoute(index) {
         if (parseInt(card.dataset.routeIndex) === index) {
             card.classList.add('selected');
             const checkIconNew = document.createElement('i');
-            checkIconNew.className = 'fas fa-check-circle text-accent-green';
+            checkIconNew.className = 'fas fa-check-circle text-verde-respira';
             card.querySelector('.route-title').appendChild(checkIconNew);
         }
     });
@@ -231,6 +231,7 @@ export async function calcularDistancia() {
     currentRoutesResult = null;
     currentTollCost = 0;
     tollEstimates = null;
+    distanciaVoltaReal = null;
     clearRace();
 
     const waypoints = [];
@@ -250,11 +251,30 @@ export async function calcularDistancia() {
     };
 
     const paradas = [parada1, parada2].filter(Boolean);
+    const idaEVoltaChecked = document.getElementById("idaEVolta")?.checked || false;
 
-    const [{ result, status }, tollResult] = await Promise.all([
+    // Se for ida e volta, busca a rota de volta separadamente (destino -> origem):
+    // ela pode ser diferente da ida por causa de retornos, mão única etc, então não dá pra só dobrar a ida.
+    const voltaPromise = idaEVoltaChecked
+        ? routeDirections({
+            origin: destino,
+            destination: origem,
+            travelMode: google.maps.TravelMode.DRIVING,
+            unitSystem: google.maps.UnitSystem.METRIC
+        })
+        : Promise.resolve(null);
+
+    const [{ result, status }, tollResult, voltaResponse] = await Promise.all([
         routeDirections(request),
-        fetchTollEstimates({ origem, destino, paradas })
+        fetchTollEstimates({ origem, destino, paradas }),
+        voltaPromise
     ]);
+
+    if (voltaResponse && voltaResponse.status === "OK") {
+        let voltaMeters = 0;
+        voltaResponse.result.routes[0].legs.forEach(leg => voltaMeters += leg.distance.value);
+        distanciaVoltaReal = voltaMeters / 1000;
+    }
 
     btn.classList.remove("loading"); btn.disabled = false;
 
@@ -269,8 +289,7 @@ export async function calcularDistancia() {
         result.routes[0].legs.forEach(leg => totalDistanceMeters += leg.distance.value);
         const distanceKm = totalDistanceMeters / 1000;
         distanciaIdaPura = distanceKm;
-        const idaEVoltaChecked = document.getElementById("idaEVolta")?.checked || false;
-        updateDistanceDisplay(distanciaIdaPura, idaEVoltaChecked);
+        updateDistanceDisplay(distanciaIdaPura, idaEVoltaChecked, distanciaVoltaReal);
 
         if (originMarker) originMarker.setMap(null); if (destinationMarker) destinationMarker.setMap(null); if (parada1Marker) parada1Marker.setMap(null); if (parada2Marker) parada2Marker.setMap(null);
 
@@ -302,6 +321,11 @@ export function clearRouteRaceVisuals() {
 
 export function getDistanciaIdaPura() {
     return distanciaIdaPura;
+}
+
+// Retorna a distância real da volta (rota destino->origem) quando "Ida e Volta" foi calculado, ou null
+export function getDistanciaVoltaReal() {
+    return distanciaVoltaReal;
 }
 
 export function getCurrentTollCost() {

@@ -61,10 +61,10 @@ export async function loadVeiculos() {
                 <div class="flex justify-between items-center">
                     <h3 class="font-semibold text-lg">${v.modelo}${placa ? ` <span class="text-xs font-normal text-gray-400 border border-gray-600 rounded px-1.5 py-0.5 ml-1 align-middle">${placa}</span>` : ''}</h3>
                     <div class="space-x-2 flex items-center">
-                        <button class="btn-edit text-blue-400 hover:text-blue-300" data-id="${v.id}" data-modelo="${v.modelo}" data-placa="${placa}" data-gas="${ef_gas}" data-eta="${ef_eta}" data-gnv="${ef_gnv}" data-die="${ef_die}">
+                        <button class="btn-edit text-azul-ceu hover:text-azul-ceu/70" data-id="${v.id}" data-modelo="${v.modelo}" data-placa="${placa}" data-gas="${ef_gas}" data-eta="${ef_eta}" data-gnv="${ef_gnv}" data-die="${ef_die}">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button class="btn-toggle-active text-yellow-400 hover:text-yellow-300" data-id="${v.id}" data-ativo="${v.ativo}">
+                        <button class="btn-toggle-active text-crema-paz hover:text-crema-paz/70" data-id="${v.id}" data-ativo="${v.ativo}">
                             <i class="fas fa-${v.ativo ? 'eye-slash' : 'eye'}"></i>
                         </button>
                         <button class="btn-delete text-red-400 hover:text-red-300" data-id="${v.id}">

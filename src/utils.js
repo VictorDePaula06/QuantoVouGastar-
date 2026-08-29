@@ -88,12 +88,10 @@ export function highlightLoginButton(message) {
         }, 3000);
     }
 
-    // 3. Fecha a sidebar no mobile
-    const sidebar = document.getElementById("sidebar");
-    const overlay = document.getElementById("sidebarOverlay");
+    // 3. Fecha a sidebar no mobile (só existe na calculadora)
     if (window.innerWidth <= 1024) {
-        sidebar.classList.add("panel-closed");
-        overlay.classList.add("hidden");
+        document.getElementById("sidebar")?.classList.add("panel-closed");
+        document.getElementById("sidebarOverlay")?.classList.add("hidden");
     }
 
     // 4. Mostra o modal de prompt de login
@@ -104,11 +102,16 @@ export function highlightLoginButton(message) {
     }
 }
 
-export function updateDistanceDisplay(distancia, idaEVoltaChecked) {
+export function updateDistanceDisplay(distanciaIda, idaEVoltaChecked, distanciaVoltaReal = null) {
     const display = document.getElementById("distanciaDisplay");
-    if (!distancia || distancia === 0) { display.textContent = "-- km"; return; }
-    const distanciaFinal = idaEVoltaChecked ? distancia * 2 : distancia;
-    display.textContent = `${distanciaFinal.toFixed(2)} km${idaEVoltaChecked ? ' (Ida e Volta)' : ''}`;
+    if (!distanciaIda || distanciaIda === 0) { display.textContent = "-- km"; return; }
+    if (!idaEVoltaChecked) { display.textContent = `${distanciaIda.toFixed(2)} km`; return; }
+
+    // Usa a distância real da volta (rota separada, pode ser diferente da ida por causa de
+    // retornos/mão única) quando disponível; só cai no dobro da ida como estimativa de reserva.
+    const volta = distanciaVoltaReal != null ? distanciaVoltaReal : distanciaIda;
+    const total = distanciaIda + volta;
+    display.textContent = `${total.toFixed(2)} km (Ida e Volta)`;
 }
 
 export function formatDuration(seconds) {

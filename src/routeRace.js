@@ -2,7 +2,7 @@
 // Efeito visual: anima um marcador em cada rota alternativa "correndo" até o destino,
 // na velocidade proporcional ao tempo estimado real — a mais rápida sempre chega primeiro.
 
-const RACE_COLORS = ['#38bdf8', '#34d399', '#fbbf24', '#a78bfa', '#fb7185'];
+const RACE_COLORS = ['#10b981', '#FFF08C', '#a78bfa', '#fb7185', '#f97316'];
 const ANIM_TOTAL_MS = 3800;
 
 let raceLines = [];
@@ -47,7 +47,7 @@ function markerIcon(color, scale = 8) {
         scale,
         fillColor: color,
         fillOpacity: 1,
-        strokeColor: '#0f172a',
+        strokeColor: '#1c1c20',
         strokeWeight: 2
     };
 }

@@ -40,13 +40,13 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #334155;
+    background: #3f3f46;
     /* Slate 700 */
     border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #475569;
+    background: #52525b;
     /* Slate 600 */
 }
 
@@ -89,22 +89,22 @@ body {
 .glass-effect {
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    background: rgba(15, 23, 42, 0.75);
-    /* Slate 900 com transparência */
+    background: rgba(18, 18, 20, 0.75);
+    /* Sidebar grafite quase preto, com transparência */
     border-right: 1px solid var(--glass-border);
 }
 
 .glass-card {
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    background: rgba(30, 41, 59, 0.65);
-    /* Slate 800 com transparência */
+    background: rgba(28, 28, 32, 0.88);
+    /* Zinc 800 com transparência (fundo dos cards, padrão Alívia) */
     border: 1px solid var(--glass-border);
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     /* Realce superior */
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    border-radius: 1rem;
-    /* Mais arredondado */
+    border-radius: 2rem;
+    /* Identidade Alívia: glassmorphism com cantos bem arredondados */
 }
 
 /* ===============================
@@ -114,7 +114,7 @@ body {
     display: block;
     font-size: 0.875rem;
     font-weight: 500;
-    color: #cbd5e1;
+    color: #d4d4d8;
     /* Slate 300 */
     margin-bottom: 0.375rem;
     letter-spacing: 0.025em;
@@ -123,29 +123,27 @@ body {
 .input-field {
     width: 100%;
     padding: 0.85rem 1.1rem;
-    background-color: rgba(2, 6, 23, 0.6);
-    /* Slate 950 bem escuro */
-    border: 1px solid #334155;
-    /* Slate 700 */
-    color: #f1f5f9;
-    /* Slate 100 */
+    background-color: rgba(10, 10, 11, 0.6);
+    /* Grafite quase preto */
+    border: 1px solid #3f3f46;
+    /* Zinc 700 */
+    color: #fafafa;
     border-radius: 0.85rem;
     font-size: 0.95rem;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .input-field:focus {
-    border-color: #38bdf8;
-    /* Sky 400 */
-    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
-    /* Sky 400 com opacidade */
+    border-color: #10b981;
+    /* Verde Esmeralda (Alívia) */
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
     outline: none;
-    background-color: rgba(2, 6, 23, 0.8);
+    background-color: rgba(10, 10, 11, 0.8);
     transform: translateY(-1px);
 }
 
 .input-field::placeholder {
-    color: #64748b;
+    color: #71717a;
     /* Slate 500 */
 }
 
@@ -175,55 +173,53 @@ body {
     transform: scale(0.98);
 }
 
-/* Primary (Blue/Sky) */
-/* Primary (Blue/Sky) - Glassy Neon */
+/* Primary (Azul Céu - Alívia) - Glassy Neon */
 .btn-primary {
-    background: rgba(14, 165, 233, 0.1);
-    /* Sky 500 / 10% */
-    color: #38bdf8;
-    /* Sky 400 */
-    border: 1px solid rgba(56, 189, 248, 0.3);
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    /* Azul Céu */
+    border: 1px solid rgba(16, 185, 129, 0.3);
     box-shadow: 0 0 0 transparent;
 }
 
 .btn-primary:hover {
-    background: rgba(14, 165, 233, 0.15);
-    border-color: #38bdf8;
-    box-shadow: 0 0 15px rgba(56, 189, 248, 0.25);
+    background: rgba(16, 185, 129, 0.15);
+    border-color: #10b981;
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.25);
     filter: brightness(1.1);
     transform: translateY(-1px);
 }
 
-/* Success (Emerald) - Glassy Neon */
+/* Success (Verde Respira - Alívia) - Glassy Neon */
 .btn-success {
     background: rgba(16, 185, 129, 0.1);
-    color: #34d399;
-    /* Emerald 400 */
-    border: 1px solid rgba(52, 211, 153, 0.3);
+    color: #10b981;
+    /* Verde Respira */
+    border: 1px solid rgba(16, 185, 129, 0.3);
     box-shadow: 0 0 0 transparent;
 }
 
 .btn-success:hover {
     background: rgba(16, 185, 129, 0.15);
-    border-color: #34d399;
-    box-shadow: 0 0 15px rgba(52, 211, 153, 0.25);
+    border-color: #10b981;
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.25);
     filter: brightness(1.1);
     transform: translateY(-1px);
 }
 
-/* Warning (Amber) - Glassy Neon */
+/* Warning (Crema Paz - Alívia) - Glassy Neon */
 .btn-warning {
-    background: rgba(245, 158, 11, 0.1);
-    color: #fbbf24;
-    /* Amber 400 */
-    border: 1px solid rgba(251, 191, 36, 0.3);
+    background: rgba(255, 240, 140, 0.1);
+    color: #FFF08C;
+    /* Crema Paz */
+    border: 1px solid rgba(255, 240, 140, 0.3);
     box-shadow: 0 0 0 transparent;
 }
 
 .btn-warning:hover {
-    background: rgba(245, 158, 11, 0.15);
-    border-color: #fbbf24;
-    box-shadow: 0 0 15px rgba(251, 191, 36, 0.25);
+    background: rgba(255, 240, 140, 0.15);
+    border-color: #FFF08C;
+    box-shadow: 0 0 15px rgba(255, 240, 140, 0.25);
     filter: brightness(1.1);
     transform: translateY(-1px);
 }
@@ -239,13 +235,43 @@ body {
 .section-title {
     font-size: 1.25rem;
     font-weight: 700;
-    color: #e2e8f0;
+    color: #f4f4f5;
     /* Slate 200 */
     margin-bottom: 1.25rem;
     padding-bottom: 0.75rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     /* Linha muito sutil */
     letter-spacing: -0.025em;
+}
+
+/* ===============================
+    Badges de status de manutenção
+    =============================== */
+.maint-badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border-radius: 9999px;
+    padding: 0.2rem 0.6rem;
+}
+
+.maint-badge-green {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.maint-badge-yellow {
+    background: rgba(255, 240, 140, 0.15);
+    color: #FFF08C;
+    border: 1px solid rgba(255, 240, 140, 0.35);
+}
+
+.maint-badge-red {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+    border: 1px solid rgba(248, 113, 113, 0.35);
 }
 
 /* ===============================
@@ -256,7 +282,7 @@ body {
     height: 72px;
     border-radius: 1rem;
     overflow: hidden;
-    background: linear-gradient(180deg, rgba(56, 189, 248, 0.06) 0%, rgba(15, 23, 42, 0.3) 100%);
+    background: linear-gradient(180deg, rgba(16, 185, 129, 0.06) 0%, rgba(18, 18, 20, 0.3) 100%);
 }
 
 .vehicle-road {
@@ -265,7 +291,7 @@ body {
     right: 0;
     bottom: 16px;
     height: 3px;
-    background-image: repeating-linear-gradient(90deg, #475569 0 18px, transparent 18px 34px);
+    background-image: repeating-linear-gradient(90deg, #52525b 0 18px, transparent 18px 34px);
     animation: vehicle-road-scroll 1s linear infinite;
 }
 
@@ -324,18 +350,18 @@ body {
 
 /* Cards de Veículos */
 .vehicle-card {
-    background: rgba(30, 41, 59, 0.4);
-    /* Slate 800 bem transparente */
-    border: 1px solid #334155;
+    background: rgba(28, 28, 32, 0.4);
+    /* Slate 900 bem transparente */
+    border: 1px solid #3f3f46;
     border-radius: 0.75rem;
     padding: 1rem;
     margin-bottom: 0.75rem;
 }
 
 .vehicle-card:hover {
-    background: rgba(30, 41, 59, 0.8);
-    border-color: #38bdf8;
-    /* Azul destaque no hover */
+    background: rgba(28, 28, 32, 0.8);
+    border-color: #10b981;
+    /* Azul Céu destaque no hover */
     transform: translateY(-2px);
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
@@ -348,8 +374,8 @@ body {
 
 /* Cards de Rota */
 .route-option-card {
-    background: rgba(15, 23, 42, 0.6);
-    border: 1px solid #334155;
+    background: rgba(10, 10, 11, 0.6);
+    border: 1px solid #3f3f46;
     border-radius: 0.75rem;
     padding: 1rem;
     margin-bottom: 0.75rem;
@@ -357,15 +383,15 @@ body {
 }
 
 .route-option-card:hover {
-    border-color: #38bdf8;
-    background: rgba(30, 41, 59, 0.8);
+    border-color: #10b981;
+    background: rgba(28, 28, 32, 0.8);
 }
 
 .route-option-card.selected {
-    background: rgba(56, 189, 248, 0.1);
-    /* Sky 400 tint */
-    border: 2px solid #38bdf8;
-    box-shadow: 0 0 0 1px #38bdf8;
+    background: rgba(16, 185, 129, 0.1);
+    /* Azul Céu tint */
+    border: 2px solid #10b981;
+    box-shadow: 0 0 0 1px #10b981;
 }
 
 .race-winner-badge {
@@ -373,9 +399,9 @@ body {
     align-items: center;
     font-size: 0.7rem;
     font-weight: 700;
-    background: rgba(251, 191, 36, 0.15);
-    color: #fbbf24;
-    border: 1px solid rgba(251, 191, 36, 0.4);
+    background: rgba(255, 240, 140, 0.15);
+    color: #FFF08C;
+    border: 1px solid rgba(255, 240, 140, 0.4);
     border-radius: 9999px;
     padding: 0.15rem 0.55rem;
     margin-left: 0.5rem;
@@ -410,7 +436,7 @@ body {
 .sidebar-handle {
     width: 3rem;
     height: 0.3rem;
-    background: #475569;
+    background: #52525b;
     /* Slate 600 */
     border-radius: 9999px;
     margin: 0.6rem auto 0.2rem;
@@ -443,7 +469,7 @@ body {
     position: sticky;
     top: 0;
     z-index: 10;
-    background: rgba(15, 23, 42, 0.92);
+    background: rgba(18, 18, 20, 0.92);
     backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--glass-border);
 }
@@ -454,7 +480,7 @@ body {
     text-align: center;
     font-size: 0.75rem;
     font-weight: 600;
-    color: #94a3b8;
+    color: #a1a1aa;
     /* Slate 400 */
     border-bottom: 2px solid transparent;
     cursor: pointer;
@@ -469,13 +495,13 @@ body {
 }
 
 .tab-btn:hover {
-    color: #e2e8f0;
+    color: #f4f4f5;
     background: rgba(255, 255, 255, 0.03);
 }
 
 .tab-btn.active {
-    color: #38bdf8;
-    border-bottom-color: #38bdf8;
+    color: #10b981;
+    border-bottom-color: #10b981;
 }
 
 /* Botão de ícone isolado (ex: geolocalização) - mantém formato compacto, não vira pílula */
@@ -485,9 +511,9 @@ body {
 }
 
 .star-btn {
-    background-color: rgba(2, 6, 23, 0.6);
-    border: 1px solid #334155;
-    color: #64748b;
+    background-color: rgba(10, 10, 11, 0.6);
+    border: 1px solid #3f3f46;
+    color: #71717a;
     border-radius: 0.75rem;
     padding: 0.7rem;
     flex-shrink: 0;
@@ -495,8 +521,8 @@ body {
 }
 
 .star-btn:hover {
-    color: #fbbf24;
-    border-color: #fbbf24;
+    color: #FFF08C;
+    border-color: #FFF08C;
 }
 
 .address-chips {
@@ -508,32 +534,32 @@ body {
 
 .address-chip {
     font-size: 0.75rem;
-    background: rgba(251, 191, 36, 0.08);
-    color: #fbbf24;
-    border: 1px solid rgba(251, 191, 36, 0.25);
+    background: rgba(255, 240, 140, 0.08);
+    color: #FFF08C;
+    border: 1px solid rgba(255, 240, 140, 0.25);
     border-radius: 9999px;
     padding: 0.25rem 0.65rem;
     cursor: pointer;
 }
 
 .address-chip:hover {
-    background: rgba(251, 191, 36, 0.15);
-    border-color: #fbbf24;
+    background: rgba(255, 240, 140, 0.15);
+    border-color: #FFF08C;
 }
 
 /* Login Status */
 .btn-auth-header {
-    background-color: rgba(56, 189, 248, 0.1);
-    color: #38bdf8;
-    border: 1px solid rgba(56, 189, 248, 0.2);
+    background-color: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.2);
     padding: 0.5rem 1rem;
     border-radius: 9999px;
     font-weight: 600;
 }
 
 .btn-auth-header:hover {
-    background-color: rgba(56, 189, 248, 0.2);
-    box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+    background-color: rgba(16, 185, 129, 0.2);
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
 }
 
 /* ===============================
@@ -554,7 +580,7 @@ body {
 
     /* Ajuste do Sidebar no Mobile */
     #sidebar {
-        background: rgba(15, 23, 42, 0.95);
+        background: rgba(18, 18, 20, 0.95);
         /* Menos transparente no mobile p/ leitura */
     }
 }
@@ -576,7 +602,7 @@ body {
     left: 50%;
     transform: translate(-50%, -50%);
     font-size: 1.15rem;
-    color: #38bdf8;
+    color: #10b981;
     animation: fuel-pump-bounce 0.9s ease-in-out infinite;
 }
 
@@ -661,7 +687,8 @@ body {
 }
 
 .message-box.success {
-    background: rgba(5, 150, 105, 0.97);
+    background: rgba(30, 110, 100, 0.97);
+    /* Verde Respira escurecido p/ contraste com texto branco */
 }
 
 .message-box.error {
@@ -669,7 +696,8 @@ body {
 }
 
 .message-box.info {
-    background: rgba(2, 132, 199, 0.97);
+    background: rgba(35, 100, 120, 0.97);
+    /* Azul Céu escurecido p/ contraste com texto branco */
 }
 
 @media (min-width: 640px) {

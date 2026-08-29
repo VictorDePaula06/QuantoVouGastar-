@@ -37,8 +37,8 @@ export async function loadTrips() {
                         <p class="text-sm text-gray-300 mt-1">${v.veiculo} • ${v.distancia} km • ${v.dataHora}</p>
                     </div>
                     <div class="flex items-center space-x-3 flex-shrink-0 ml-2">
-                        <span class="text-accent-green font-semibold">R$ ${Number(v.custoTotal).toFixed(2)}</span>
-                        <button class="btn-replay-viagem text-blue-400 hover:text-blue-300" data-id="${v.id}" title="Refazer esta viagem">
+                        <span class="text-verde-respira font-semibold">R$ ${Number(v.custoTotal).toFixed(2)}</span>
+                        <button class="btn-replay-viagem text-azul-ceu hover:text-azul-ceu/70" data-id="${v.id}" title="Refazer esta viagem">
                             <i class="fas fa-redo"></i>
                         </button>
                         <button class="btn-delete-viagem text-red-400 hover:text-red-300" data-id="${v.id}">

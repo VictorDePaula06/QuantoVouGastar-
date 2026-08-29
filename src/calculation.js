@@ -1,7 +1,7 @@
 // src/calculation.js
 import { showMessage, saveLastCost, highlightLoginButton, spawnCoinBurst } from "./utils.js";
 import { getVeiculoSelecionadoData, setVeiculoSelecionadoData } from "./vehicle.js";
-import { getDistanciaIdaPura, getCurrentTollCost, getCurrentRoutesResult, getDirectionsRenderer, captureMap, clearRouteRaceVisuals } from "./map.js";
+import { getDistanciaIdaPura, getDistanciaVoltaReal, getCurrentTollCost, getCurrentRoutesResult, getDirectionsRenderer, captureMap, clearRouteRaceVisuals } from "./map.js";
 import { db, getCurrentUserId } from "./auth.js";
 import { getDoc, doc } from "firebase/firestore";
 import { tripService } from "./services/tripService.js";
@@ -37,7 +37,12 @@ export async function calcularCusto() {
     const distanciaBase = getDistanciaIdaPura();
     if (!distanciaBase || distanciaBase === 0) { showMessage("Calcule a rota primeiro!", "error"); return; }
 
-    const distancia_ajustada = distanciaBase * (idaEVoltaChecked ? 2 : 1);
+    // Usa a distância real da volta (rota separada calculada destino->origem) quando disponível,
+    // já que ela pode ser diferente da ida por causa de retornos, mão única etc.
+    const distanciaVoltaReal = getDistanciaVoltaReal();
+    const distancia_ajustada = idaEVoltaChecked
+        ? distanciaBase + (distanciaVoltaReal != null ? distanciaVoltaReal : distanciaBase)
+        : distanciaBase;
     const btn = document.getElementById("calcularBtn"); btn.classList.add("loading"); btn.disabled = true;
     try {
         const litrosNecessarios = distancia_ajustada / eficiencia;
@@ -61,7 +66,7 @@ export async function calcularCusto() {
         const hasTolls = currentRoute?.warnings?.some(w => w.toLowerCase().includes('tolls') || w.toLowerCase().includes('pedágio'));
 
         if (custoPedagio <= 0 && hasTolls) {
-            tollWarningHtml = `<div class="text-xs text-yellow-200 mt-2 font-bold"><i class="fas fa-exclamation-triangle"></i> Atenção: Pedágios detectados na rota, mas nenhum valor foi informado.</div>`;
+            tollWarningHtml = `<div class="text-xs text-crema-paz mt-2 font-bold"><i class="fas fa-exclamation-triangle"></i> Atenção: Pedágios detectados na rota, mas nenhum valor foi informado.</div>`;
         }
 
         resultadoValor.innerHTML = `
@@ -94,6 +99,7 @@ export async function calcularCusto() {
             preco: preco,
             eficiencia: eficiencia,
             distanciaBase: distanciaBase,
+            distanciaVoltaReal: distanciaVoltaReal,
             custoCombustivel: custoCombustivel,
             custoPedagio: custoPedagio, // NOVO
             origem: document.getElementById("origem").value.trim(),
@@ -166,7 +172,7 @@ export async function generateReimbursementReport() {
         return;
     }
 
-    const { veiculo, placa, combustivel, preco, eficiencia, distanciaBase, custoCombustivel, custoPedagio, origem, destino, distancia, custoTotal, litros, unidade, idaEVolta, rota, dataHora } = lastCalculationData;
+    const { veiculo, placa, combustivel, preco, eficiencia, distanciaBase, distanciaVoltaReal, custoCombustivel, custoPedagio, origem, destino, distancia, custoTotal, litros, unidade, idaEVolta, rota, dataHora } = lastCalculationData;
     const unidadeEficiencia = combustivel.toLowerCase() === 'gnv' ? 'km/m³' : 'km/l';
 
     showMessage("Gerando relatório...", "info");
@@ -237,7 +243,8 @@ export async function generateReimbursementReport() {
 
     // Custo Total
     doc.setFontSize(16);
-    doc.setTextColor(5, 150, 105);
+    doc.setTextColor(30, 110, 100);
+    /* Verde Respira escurecido p/ contraste no papel */
     doc.text("Custo Total:", 15, y);
     doc.text(`R$ ${custoTotal.toFixed(2)}`, 195, y, null, null, "right");
     doc.setTextColor(0, 0, 0);
@@ -251,7 +258,11 @@ export async function generateReimbursementReport() {
     doc.setTextColor(71, 85, 105);
 
     if (idaEVolta && distanciaBase) {
-        doc.text(`Distância (ida): ${distanciaBase.toFixed(2)} km  ×  2 (ida e volta)  =  ${distancia} km`, 15, y);
+        if (distanciaVoltaReal != null) {
+            doc.text(`Distância: ${distanciaBase.toFixed(2)} km (ida)  +  ${distanciaVoltaReal.toFixed(2)} km (volta, rota real)  =  ${distancia} km`, 15, y);
+        } else {
+            doc.text(`Distância (ida): ${distanciaBase.toFixed(2)} km  ×  2 (ida e volta)  =  ${distancia} km`, 15, y);
+        }
         y += 6;
     } else {
         doc.text(`Distância percorrida: ${distancia} km`, 15, y);

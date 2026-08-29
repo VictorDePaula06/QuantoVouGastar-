@@ -76,7 +76,7 @@ function renderAddressList(enderecos) {
         card.innerHTML = `
             <div class="flex justify-between items-center">
                 <div>
-                    <h3 class="font-semibold text-lg"><i class="fas fa-star text-yellow-400 mr-1"></i>${end.apelido}</h3>
+                    <h3 class="font-semibold text-lg"><i class="fas fa-star text-crema-paz mr-1"></i>${end.apelido}</h3>
                     <p class="text-sm text-gray-300 mt-1">${end.endereco}</p>
                 </div>
                 <button class="btn-delete-endereco text-red-400 hover:text-red-300" data-id="${end.id}">
@@ -102,7 +102,7 @@ function renderChips(fieldKey, enderecos) {
         const chip = document.createElement("button");
         chip.type = "button";
         chip.className = "address-chip";
-        chip.innerHTML = `<i class="fas fa-star text-yellow-400 mr-1"></i>${end.apelido}`;
+        chip.innerHTML = `<i class="fas fa-star text-crema-paz mr-1"></i>${end.apelido}`;
         chip.addEventListener("click", () => {
             document.getElementById(input).value = end.endereco;
         });
