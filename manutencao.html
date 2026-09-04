@@ -89,6 +89,32 @@
             </div>
         </div>
 
+        <div id="saudeCarroCard" class="card-section border border-gray-600 glass-card hidden">
+            <h2 class="section-title text-gray-200">
+                <i class="fas fa-heart-pulse mr-2"></i> Saúde do Carro
+            </h2>
+            <div class="flex items-center gap-4">
+                <div class="relative flex-shrink-0 w-20 h-20">
+                    <svg viewBox="0 0 36 36" class="w-20 h-20 -rotate-90">
+                        <path stroke="#3f3f46" stroke-width="3" fill="none"
+                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        <path id="saudeGaugeArc" stroke="#10b981" stroke-width="3" stroke-dasharray="0, 100"
+                            stroke-linecap="round" fill="none"
+                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                            style="transition: stroke-dasharray 0.6s ease;" />
+                    </svg>
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <span id="saudeScoreText" class="text-xl font-bold text-gray-50">--</span>
+                    </div>
+                </div>
+                <div class="flex-1">
+                    <p id="saudeLabelText" class="font-semibold text-lg"></p>
+                    <p id="saudeSubText" class="text-xs text-gray-400 mt-0.5"></p>
+                </div>
+            </div>
+            <div id="saudeNaoRastreado" class="mt-3 pt-3 border-t border-gray-700 hidden"></div>
+        </div>
+
         <!-- Barra discreta: só expande quando o usuário quer ler o guia -->
         <button id="toggleGuiaBtn"
             class="w-full flex items-center justify-between px-4 py-2.5 rounded-full bg-white/5 border border-gray-700 text-sm text-gray-300 hover:bg-white/10 transition-colors"
@@ -130,6 +156,10 @@
                     <label for="maintKm" class="input-label">Km da Última Troca</label>
                     <input type="number" id="maintKm" placeholder="Ex: 40000" class="input-field">
                 </div>
+                <div>
+                    <label for="maintCusto" class="input-label">Valor Pago (R$) — opcional</label>
+                    <input type="number" id="maintCusto" step="0.01" placeholder="Ex: 150.00" class="input-field">
+                </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label for="maintIntervaloKm" class="input-label">Intervalo (km)</label>
@@ -144,6 +174,14 @@
                     <i class="fas fa-save mr-2"></i> Salvar
                 </button>
             </div>
+        </div>
+
+        <div class="card-section border border-gray-600 glass-card">
+            <h2 class="section-title text-gray-200">
+                <i class="fas fa-receipt mr-2"></i> Histórico de Manutenções
+            </h2>
+            <div id="historicoManutResumo" class="text-sm text-gray-400 mb-3"></div>
+            <div id="historicoManutList" class="space-y-2 w-full"></div>
         </div>
 
     </main>

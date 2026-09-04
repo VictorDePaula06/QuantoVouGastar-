@@ -4,6 +4,7 @@ import {
 } from "firebase/firestore";
 
 const COLLECTION_NAME = "manutencoes";
+const HISTORICO_COLLECTION = "manutencoes_historico";
 
 export const maintenanceService = {
     async getAll(userId) {
@@ -29,5 +30,26 @@ export const maintenanceService = {
 
     async remove(id) {
         await deleteDoc(doc(db, COLLECTION_NAME, id));
+    },
+
+    // Histórico de manutenções realizadas (cada troca feita vira um registro, não sobrescreve)
+    async getHistorico(userId) {
+        const q = query(collection(db, HISTORICO_COLLECTION), where("userId", "==", userId));
+        const snapshot = await getDocs(q);
+        const items = [];
+        snapshot.forEach(d => items.push({ id: d.id, ...d.data() }));
+        return items;
+    },
+
+    async addHistorico(userId, data) {
+        return await addDoc(collection(db, HISTORICO_COLLECTION), {
+            userId,
+            ...data,
+            createdAt: new Date()
+        });
+    },
+
+    async removeHistorico(id) {
+        await deleteDoc(doc(db, HISTORICO_COLLECTION, id));
     }
 };
