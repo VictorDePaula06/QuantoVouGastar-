@@ -9,8 +9,8 @@
     <!-- PWA -->
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#121214">
-    <link rel="icon" href="/Imgs/logo7.png">
-    <link rel="apple-touch-icon" href="/Imgs/logo7.png">
+    <link rel="icon" type="image/png" href="/Imgs/favicon-64.png">
+    <link rel="apple-touch-icon" href="/Imgs/apple-touch-icon.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Quanto Vou Gastar">
@@ -66,7 +66,7 @@
                         <i class="fas fa-bars text-xl text-azul-ceu"></i>
                     </button>
 
-                    <img src="Imgs/logo7.png" alt="Logo QuantovouGastar" class="h-14 w-auto" id="mainLogo">
+                    <img src="/Imgs/icon-192.png" alt="Logo Quanto Vou Gastar" class="h-10 w-10 rounded-xl" id="mainLogo">
 
                     <div>
                         <h1 class="text-xl font-bold text-gray-50 hidden sm:block">Calculadora de Combustível</h1>
@@ -168,6 +168,10 @@
                                             class="input-field flex-grow">
                                         <button id="starDestinoBtn" class="star-btn" title="Salvar este endereço">
                                             <i class="fas fa-star"></i>
+                                        </button>
+                                        <button id="inverterRotaBtn" type="button" class="btn-primary flex-shrink-0"
+                                            title="Inverter origem e destino">
+                                            <i class="fas fa-arrows-up-down"></i>
                                         </button>
                                     </div>
                                     <div id="chipsDestino" class="address-chips hidden"></div>

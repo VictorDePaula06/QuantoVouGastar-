@@ -310,8 +310,35 @@ export async function calcularDistancia() {
     } else { showMessage("Erro ao calcular rota. Verifique os endereços informados.", "error"); console.error("Erro na API de Direções:", status); }
 }
 
+// Inverte origem e destino (como a setinha do Google Maps). Se já havia uma rota calculada, recalcula.
+function inverterOrigemDestino() {
+    const origemInput = document.getElementById("origem");
+    const destinoInput = document.getElementById("destino");
+    if (!origemInput.value.trim() && !destinoInput.value.trim()) return;
+
+    [origemInput.value, destinoInput.value] = [destinoInput.value, origemInput.value];
+
+    const placeOrigem = lastPlaces.origem;
+    const placeDestino = lastPlaces.destino;
+    delete lastPlaces.origem;
+    delete lastPlaces.destino;
+    if (placeDestino) lastPlaces.origem = placeDestino;
+    if (placeOrigem) lastPlaces.destino = placeOrigem;
+
+    // Marcadores de pré-visualização (antes de calcular a rota) também trocam de lado
+    if (originMarker) { originMarker.setMap(null); originMarker = null; }
+    if (destinationMarker) { destinationMarker.setMap(null); destinationMarker = null; }
+    if (lastPlaces.origem) updateOriginMarker(lastPlaces.origem);
+    if (lastPlaces.destino) updateDestinationMarker(lastPlaces.destino);
+
+    if (currentRoutesResult && origemInput.value.trim() && destinoInput.value.trim()) {
+        calcularDistancia();
+    }
+}
+
 export function initializeMapListeners() {
     document.getElementById("calcularDistanciaBtn").addEventListener("click", calcularDistancia);
+    document.getElementById("inverterRotaBtn")?.addEventListener("click", inverterOrigemDestino);
 }
 
 // Remove as trilhas/marcadores da corrida do mapa, deixando só a rota escolhida visível (usado antes de capturar o mapa para relatórios)

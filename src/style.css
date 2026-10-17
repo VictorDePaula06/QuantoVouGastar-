@@ -505,7 +505,8 @@ body {
 }
 
 /* Botão de ícone isolado (ex: geolocalização) - mantém formato compacto, não vira pílula */
-#geolocalizacaoBtn {
+#geolocalizacaoBtn,
+#inverterRotaBtn {
     border-radius: 0.85rem;
     padding: 0.85rem;
 }
